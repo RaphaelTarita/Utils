@@ -96,4 +96,8 @@ public class HammingChunk {
             return 0;
         }
     }
+
+    public HammingBit at(int index) {
+        return splitData.get(index);
+    }
 }

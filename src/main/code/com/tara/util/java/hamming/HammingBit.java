@@ -38,4 +38,8 @@ public class HammingBit {
     public boolean isCheck() {
         return bitType == BitType.CHECK;
     }
+
+    public void flip() {
+        bitVal = !bitVal;
+    }
 }

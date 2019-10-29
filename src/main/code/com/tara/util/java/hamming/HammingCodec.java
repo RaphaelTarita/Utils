@@ -47,7 +47,25 @@ public class HammingCodec {
         for (HammingChunk c : encoded) {
             List<Boolean> givenChecks = c.checks();
             List<Boolean> computedChecks = computeChecks(c);
-            // TODO
+            List<Integer> bitFlipParityIndexes = new ArrayList<>();
+            for (int i = 0; i < givenChecks.size(); i++) {
+                if (givenChecks.get(i) != computedChecks.get(i)) {
+                    bitFlipParityIndexes.add(i);
+                }
+            }
+            int bitFlipIndex = -1;
+            for (Integer i : bitFlipParityIndexes) {
+                bitFlipIndex = (
+                        bitFlipIndex == -1
+                                ? i
+                                : bitFlipIndex + i
+                );
+            }
+
+            if (bitFlipIndex != -1) {
+                c.at(bitFlipIndex).flip();
+            }
+            res.addAll(c.values());
         }
 
         decoded = new DecodedHamming(res, encoded.chunkSize());
@@ -60,10 +78,19 @@ public class HammingCodec {
 
     private List<Boolean> computeChecks(HammingChunk c) {
         List<Boolean> res = new ArrayList<>();
-        List<Boolean> values = c.values();
         int checkIndex = 0;
-        for (int i = 0; i < c.chunkSize(); i++, checkIndex = (int) Math.pow(2, i)) {
-            // TODO
+        for (int i = 0; checkIndex < c.chunkSize(); i++, checkIndex = (int) Math.pow(2, i)) {
+            Boolean current = null;
+            for (HammingBit b : c.split()) {
+                if ((checkIndex & (1 << b.index())) == 1) {
+                    if (current == null) {
+                        current = b.bit();
+                    } else {
+                        current = current != b.bit();
+                    }
+                }
+            }
+            res.add(current);
         }
         return res;
     }
