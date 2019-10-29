@@ -20,6 +20,7 @@ public abstract class HammingBase implements List<HammingChunk> {
                 data.add(new HammingChunk(chunkbuf));
             }
         }
+        data.add(new HammingChunk(chunkbuf));
     }
 
     private void chunkSplit(List<Boolean> stream) {
@@ -33,6 +34,7 @@ public abstract class HammingBase implements List<HammingChunk> {
                 chunkbuf.clear();
             }
         }
+        data.add(new HammingChunk(chunkbuf));
     }
 
     private byte[] streamRaw() {

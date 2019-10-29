@@ -45,11 +45,11 @@ public class HammingCodec {
     public void decode() {
         List<Boolean> res = new ArrayList<>();
         for (HammingChunk c : encoded) {
-            List<Boolean> givenChecks = c.checks();
-            List<Boolean> computedChecks = computeChecks(c);
+            List<Boolean> givenParities = c.parities();
+            List<Boolean> computedParities = computeParities(c);
             List<Integer> bitFlipParityIndexes = new ArrayList<>();
-            for (int i = 0; i < givenChecks.size(); i++) {
-                if (givenChecks.get(i) != computedChecks.get(i)) {
+            for (int i = 0; i < givenParities.size(); i++) {
+                if (givenParities.get(i) != computedParities.get(i)) {
                     bitFlipParityIndexes.add(i);
                 }
             }
@@ -76,7 +76,21 @@ public class HammingCodec {
         wasProcessed = true;
     }
 
-    private List<Boolean> computeChecks(HammingChunk c) {
+    public DecodedHamming getDecoded() {
+        if (!wasProcessed) {
+            throw new IllegalStateException("Accessors are only available after processing");
+        }
+        return decoded;
+    }
+
+    public EncodedHamming getEncoded() {
+        if (!wasProcessed) {
+            throw new IllegalStateException("Accessors are only available after processing");
+        }
+        return encoded;
+    }
+
+    private List<Boolean> computeParities(HammingChunk c) {
         List<Boolean> res = new ArrayList<>();
         int checkIndex = 0;
         for (int i = 0; checkIndex < c.chunkSize(); i++, checkIndex = (int) Math.pow(2, i)) {

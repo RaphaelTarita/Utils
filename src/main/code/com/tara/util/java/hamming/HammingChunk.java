@@ -67,10 +67,10 @@ public class HammingChunk {
         return splitData;
     }
 
-    public List<Boolean> checks() {
+    public List<Boolean> parities() {
         List<Boolean> res = new ArrayList<>();
         for (HammingBit b : splitData) {
-            if (b.isCheck()) {
+            if (b.isParity()) {
                 res.add(b.bit());
             }
         }
