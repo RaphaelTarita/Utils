@@ -1,9 +1,6 @@
 package com.tara.util.async.tasks;
 
-import com.tara.util.async.tasks.criteria.ANDGroupCriterion;
-import com.tara.util.async.tasks.criteria.GroupCriterion;
-import com.tara.util.async.tasks.criteria.ManualInvokeCriterion;
-import com.tara.util.async.tasks.criteria.TaskCriterion;
+import com.tara.util.async.tasks.criteria.*;
 import com.tara.util.async.tasks.lock.LockingAction;
 import com.tara.util.async.tasks.lock.TaskLock;
 import com.tara.util.async.tasks.procedure.ProcedureException;
@@ -37,17 +34,17 @@ public class Task implements Runnable {
 
     public Task(String taskName, TaskProcedure taskProcedure, List<TaskCriterion> criteria) {
         this(
-                taskName,
-                taskProcedure,
-                new ANDGroupCriterion(criteria)
+            taskName,
+            taskProcedure,
+            new ANDGroupCriterion(criteria)
         );
     }
 
     public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion... criteria) {
         this(
-                taskName,
-                taskProcedure,
-                new ANDGroupCriterion(criteria)
+            taskName,
+            taskProcedure,
+            new ANDGroupCriterion(criteria)
         );
     }
 
@@ -76,6 +73,14 @@ public class Task implements Runnable {
             ((ManualInvokeCriterion) criterion).invoke();
         } else if (criterion instanceof GroupCriterion) {
             ((GroupCriterion) criterion).invokeManuals();
+        }
+    }
+
+    public void turnOff() {
+        if (criterion instanceof ManualRevokeCriterion) {
+            ((ManualRevokeCriterion) criterion).revoke();
+        } else if (criterion instanceof GroupCriterion) {
+            ((GroupCriterion) criterion).revokeManuals();
         }
     }
 

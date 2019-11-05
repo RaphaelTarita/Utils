@@ -61,4 +61,14 @@ public abstract class GroupCriterion extends TaskCriterion {
             }
         }
     }
+
+    public void revokeManuals() {
+        for (TaskCriterion criterion : criteria) {
+            if (criterion instanceof ManualRevokeCriterion) {
+                ((ManualRevokeCriterion) criterion).revoke();
+            } else if (criterion instanceof GroupCriterion) {
+                ((GroupCriterion) criterion).revokeManuals();
+            }
+        }
+    }
 }

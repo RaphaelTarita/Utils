@@ -19,4 +19,8 @@ public abstract class TaskCriterion {
         observed = false;
         reset();
     }
+
+    public NegateCriterion negate() {
+        return new NegateCriterion(this);
+    }
 }
