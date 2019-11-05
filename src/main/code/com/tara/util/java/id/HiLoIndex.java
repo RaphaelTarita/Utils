@@ -48,6 +48,10 @@ public class HiLoIndex {
         this.index = index;
     }
 
+    public long toLong() {
+        return index;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof HiLoIndex)
