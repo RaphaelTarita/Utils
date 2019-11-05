@@ -1,6 +1,6 @@
 package com.tara.util.main;
 
-import com.tara.util.java.hamming.EncodedHamming;
+import com.tara.util.java.hamming.DecodedHamming;
 import com.tara.util.java.hamming.HammingCodec;
 
 import java.io.PrintStream;
@@ -30,9 +30,8 @@ public class InfoClass {
                 )
         );
 
-        EncodedHamming eh = new EncodedHamming(bits, 8);
-        HammingCodec hc = HammingCodec.unprocessed(eh);
-        hc.decode();
-        OUT.println(hc.getDecoded().split());
+        DecodedHamming eh = new DecodedHamming(bits, 12);
+        HammingCodec hc = new HammingCodec(eh);
+        OUT.println(hc.getEncoded().split());
     }
 }

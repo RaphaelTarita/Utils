@@ -4,10 +4,10 @@ import java.util.List;
 
 public class EncodedHamming extends HammingBase {
     public EncodedHamming(byte[] rawInput, int chunkSize) {
-        super(rawInput, chunkSize);
+        super(rawInput, chunkSize, true);
     }
 
     public EncodedHamming(List<Boolean> splitInput, int chunkSize) {
-        super(splitInput, chunkSize);
+        super(splitInput, chunkSize, true);
     }
 }

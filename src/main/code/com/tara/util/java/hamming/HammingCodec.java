@@ -8,6 +8,10 @@ public class HammingCodec {
     private EncodedHamming encoded;
     private boolean wasProcessed;
 
+    private static boolean isInteger(double d) {
+        return (d == Math.floor(d)) && !Double.isInfinite(d);
+    }
+
     public static HammingCodec unprocessed(HammingBase input) {
         return new HammingCodec(input, false);
     }
@@ -49,7 +53,7 @@ public class HammingCodec {
             List<Boolean> computedParities = computeParities(c);
             List<Integer> bitFlipParityIndexes = new ArrayList<>();
             for (int i = 0; i < givenParities.size(); i++) {
-                if (givenParities.get(i) != computedParities.get(i)) {
+                if (!givenParities.get(i).equals(computedParities.get(i))) {
                     bitFlipParityIndexes.add(i);
                 }
             }
@@ -73,6 +77,20 @@ public class HammingCodec {
     }
 
     public void encode() {
+        List<Boolean> res = new ArrayList<>();
+        for (HammingChunk c : decoded) {
+            List<Boolean> parities = computeParities(c);
+            int parityCounter = 0;
+            int valueCounter = 0;
+            for (int i = 0; parityCounter < parities.size() && valueCounter < parities.size(); i++) {
+                if (isInteger(Math.log(i) / Math.log(2))) {
+                    res.add(parities.get(parityCounter++));
+                } else {
+                    res.add(c.at(valueCounter++).bit());
+                }
+            }
+        }
+        encoded = new EncodedHamming(res, decoded.chunkSize());
         wasProcessed = true;
     }
 
@@ -92,11 +110,10 @@ public class HammingCodec {
 
     private List<Boolean> computeParities(HammingChunk c) {
         List<Boolean> res = new ArrayList<>();
-        int checkIndex = 0;
-        for (int i = 0; checkIndex < c.chunkSize(); i++, checkIndex = (int) Math.pow(2, i)) {
+        for (int i = 0; i < c.chunkSize(); i++) {
             Boolean current = null;
             for (HammingBit b : c.split()) {
-                if ((checkIndex & (1 << b.index())) == 1) {
+                if (((b.index() >> i) & 1) == 1) {
                     if (current == null) {
                         current = b.bit();
                     } else {

@@ -10,31 +10,31 @@ public abstract class HammingBase implements List<HammingChunk> {
     private int hammingChunkSize;
     private List<HammingChunk> data = new ArrayList<>();
 
-    private void chunkRaw(byte[] stream) {
+    private void chunkRaw(byte[] stream, boolean encoded) {
         int count = 0;
         byte[] chunkbuf = new byte[hammingChunkSize];
         for (byte b : stream) {
             chunkbuf[count] = b;
             if (count++ >= hammingChunkSize) {
                 count = 0;
-                data.add(new HammingChunk(chunkbuf));
+                data.add(new HammingChunk(chunkbuf, encoded));
             }
         }
-        data.add(new HammingChunk(chunkbuf));
+        data.add(new HammingChunk(chunkbuf, encoded));
     }
 
-    private void chunkSplit(List<Boolean> stream) {
+    private void chunkSplit(List<Boolean> stream, boolean encoded) {
         int count = 0;
         List<Boolean> chunkbuf = new ArrayList<>(hammingChunkSize);
         for (boolean b : stream) {
             chunkbuf.add(b);
             if (count++ >= hammingChunkSize) {
                 count = 0;
-                data.add(new HammingChunk(chunkbuf));
+                data.add(new HammingChunk(chunkbuf, encoded));
                 chunkbuf.clear();
             }
         }
-        data.add(new HammingChunk(chunkbuf));
+        data.add(new HammingChunk(chunkbuf, encoded));
     }
 
     private byte[] streamRaw() {
@@ -57,21 +57,19 @@ public abstract class HammingBase implements List<HammingChunk> {
         return res;
     }
 
-    protected HammingBase(byte[] rawInput, int chunkSize) {
+    protected HammingBase(byte[] rawInput, int chunkSize, boolean encoded) {
         hammingChunkSize = chunkSize;
-        chunkRaw(rawInput);
-        splitUp();
+        chunkRaw(rawInput, encoded);
     }
 
-    protected HammingBase(List<Boolean> splitInput, int chunkSize) {
+    protected HammingBase(List<Boolean> splitInput, int chunkSize, boolean encoded) {
         hammingChunkSize = chunkSize;
-        chunkSplit(splitInput);
-        merge();
+        chunkSplit(splitInput, encoded);
     }
 
-    protected void splitUp() {
+    protected void splitUp(boolean encoded) {
         for (HammingChunk c : data) {
-            c.splitUp();
+            c.splitUp(encoded);
         }
     }
 

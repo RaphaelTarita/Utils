@@ -9,6 +9,12 @@ public class HammingBit {
         return (d == Math.floor(d)) && !Double.isInfinite(d);
     }
 
+    public HammingBit(boolean bit, int index, BitType all) {
+        bitVal = bit;
+        bitIndex = index;
+        bitType = all;
+    }
+
     public HammingBit(boolean bit, int index) {
         bitVal = bit;
         bitIndex = index;
@@ -45,8 +51,20 @@ public class HammingBit {
 
     @Override
     public String toString() {
-        return (isParity() ? "(" : "")
-                + (bitVal ? '1' : '0')
-                + (isParity() ? ")" : "");
+        return (
+                isParity()
+                        ? "("
+                        : ""
+        )
+                + (
+                bitVal
+                        ? '1'
+                        : '0'
+        )
+                + (
+                isParity()
+                        ? ")"
+                        : ""
+        );
     }
 }

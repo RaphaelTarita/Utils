@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HammingChunk {
-    private static final int[] MASKS = new int[]{
+    public static final int[] MASKS = new int[]{
             0x1,
             0x2,
             0x4,
@@ -17,25 +17,33 @@ public class HammingChunk {
     private byte[] rawData;
     private List<HammingBit> splitData = new ArrayList<>();
 
-    public HammingChunk(byte[] rawInput) {
+    public HammingChunk(byte[] rawInput, boolean encoded) {
         rawData = rawInput.clone();
-        splitUp();
+        splitUp(encoded);
     }
 
-    public HammingChunk(List<Boolean> splitInput) {
+    public HammingChunk(List<Boolean> splitInput, boolean encoded) {
         int count = 0;
         for (Boolean b : splitInput) {
-            splitData.add(new HammingBit(b, count));
+            if (encoded) {
+                splitData.add(new HammingBit(b, count));
+            } else {
+                splitData.add(new HammingBit(b, count, BitType.VALUE));
+            }
             count++;
         }
         merge();
     }
 
-    public void splitUp() {
+    public void splitUp(boolean encoded) {
         int count = 0;
         for (byte b : rawData) {
             for (int mask : MASKS) {
-                splitData.add(new HammingBit((b & mask) != 0, count));
+                if (encoded) {
+                    splitData.add(new HammingBit((b & mask) != 0, count));
+                } else {
+                    splitData.add(new HammingBit((b & mask) != 0, count, BitType.VALUE));
+                }
                 count++;
             }
         }
