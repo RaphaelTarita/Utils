@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class HiLoIndex implements Serializable {
-    private static final long serialVersionUID = 3451259307707347891L;
+    private static final long serialVersionUID = 62459995810455813L;
 
     private enum HiLo {
         HI,

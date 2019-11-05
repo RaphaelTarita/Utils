@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class TaskID implements Serializable {
-    private static final long serialVersionUID = 4240627587131898285L;
+    private static final long serialVersionUID = -71980682148021938L;
 
     private String taskName;
     private HiLoIndex index;
