@@ -1,10 +1,14 @@
 package com.tara.util.java.async.tasks;
 
+import com.tara.util.java.async.tasks.criteria.ANDGroupCriterion;
 import com.tara.util.java.async.tasks.criteria.GroupCriterion;
 import com.tara.util.java.async.tasks.criteria.ManualInvokeCriterion;
 import com.tara.util.java.async.tasks.criteria.TaskCriterion;
 import com.tara.util.java.async.tasks.lock.LockingAction;
 import com.tara.util.java.async.tasks.lock.TaskLock;
+import com.tara.util.java.async.tasks.procedure.ProcedureException;
+import com.tara.util.java.async.tasks.procedure.TaskProcedure;
+import com.tara.util.java.async.tasks.procedure.TaskProcedureException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -15,35 +19,35 @@ public class Task implements Runnable {
     private final TaskID id;
     private TaskLock lock;
     private boolean retry;
-    private Procedure task;
+    private TaskProcedure taskProcedure;
     private TaskCriterion criterion;
 
     private void resetAll() {
         criterion.reset();
     }
 
-    public Task(String taskName, Procedure task, TaskCriterion criterion) {
+    public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion criterion) {
         id = new TaskID(taskName);
         lock = new TaskLock(id);
         retry = false;
-        this.task = task;
+        this.taskProcedure = taskProcedure;
         this.criterion = criterion;
         iterations = 0L;
     }
 
-    public Task(String taskName, Procedure task, List<TaskCriterion> criteria) {
+    public Task(String taskName, TaskProcedure taskProcedure, List<TaskCriterion> criteria) {
         this(
                 taskName,
-                task,
-                new GroupCriterion(criteria)
+                taskProcedure,
+                new ANDGroupCriterion(criteria)
         );
     }
 
-    public Task(String taskName, Procedure task, TaskCriterion... criteria) {
+    public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion... criteria) {
         this(
                 taskName,
-                task,
-                new GroupCriterion(criteria)
+                taskProcedure,
+                new ANDGroupCriterion(criteria)
         );
     }
 
@@ -54,7 +58,7 @@ public class Task implements Runnable {
             ((GroupCriterion) newCriterion).add(criterion);
             criterion = newCriterion;
         } else {
-            criterion = new GroupCriterion(criterion, newCriterion);
+            criterion = new ANDGroupCriterion(criterion, newCriterion);
         }
         criterion.startObservance();
     }
@@ -71,13 +75,7 @@ public class Task implements Runnable {
         if (criterion instanceof ManualInvokeCriterion) {
             ((ManualInvokeCriterion) criterion).invoke();
         } else if (criterion instanceof GroupCriterion) {
-            ((GroupCriterion) criterion).executeForEach(
-                    (partialCriterion) -> {
-                        if (partialCriterion instanceof ManualInvokeCriterion) {
-                            ((ManualInvokeCriterion) partialCriterion).invoke();
-                        }
-                    }
-            );
+            ((GroupCriterion) criterion).invokeManuals();
         }
     }
 
@@ -117,12 +115,12 @@ public class Task implements Runnable {
             log.info("Recovering Task {}...", toString());
             try {
                 lock.lockOrRenewOnAction(LockingAction.RECOVER);
-                task.execute();
+                taskProcedure.execute();
                 log.debug("Successfully recovered");
                 lock.lift();
-            } catch (Exception ex) {
+            } catch (ProcedureException ex) {
                 log.debug("Recovery failed, Task stays locked");
-                lock.renewOnException(ex);
+                lock.renewOnException(new TaskProcedureException(ex, id));
             }
         }
     }
@@ -131,13 +129,13 @@ public class Task implements Runnable {
         resetAll();
         try {
             lock.lockOrRenewOnAction(LockingAction.EXECUTE);
-            task.execute();
+            taskProcedure.execute();
             lock.liftRLock();
             retry = false;
             iterations++;
-        } catch (Exception ex) {
+        } catch (ProcedureException ex) {
             log.debug("Exception occurred in Task, locking...");
-            lock.lockOrRenewOnException(ex);
+            lock.lockOrRenewOnException(new TaskProcedureException(ex, id));
         }
     }
 

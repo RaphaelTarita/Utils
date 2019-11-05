@@ -10,7 +10,7 @@ public class ChangeWatcherCriterion<W> extends WatcherCriterion<W> {
         super(watch);
         original = null;
         this.copySupplier = copySupplier;
-        assignWatcher((watchParam) -> watchParam.equals(original));
+        assignWatcher(watchParam -> !watchParam.equals(original));
     }
 
     @Override

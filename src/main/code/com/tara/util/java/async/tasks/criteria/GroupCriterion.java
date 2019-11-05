@@ -6,24 +6,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class GroupCriterion extends TaskCriterion {
-    private List<TaskCriterion> criteria;
-    private boolean checkAll;
+public abstract class GroupCriterion extends TaskCriterion {
+    protected List<TaskCriterion> criteria;
 
-    public GroupCriterion(List<TaskCriterion> criteria, boolean checkAll) {
+    protected GroupCriterion(List<TaskCriterion> criteria) {
         this.criteria = criteria;
-        this.checkAll = checkAll;
     }
 
-    public GroupCriterion(List<TaskCriterion> criteria) {
-        this(criteria, true);
-    }
-
-    public GroupCriterion(TaskCriterion criterion) {
+    protected GroupCriterion(TaskCriterion criterion) {
         this(new ArrayList<>(Collections.singleton(criterion)));
     }
 
-    public GroupCriterion(TaskCriterion... criteria) {
+    protected GroupCriterion(TaskCriterion... criteria) {
         this(new ArrayList<>(Arrays.asList(criteria)));
     }
 
@@ -39,17 +33,7 @@ public class GroupCriterion extends TaskCriterion {
     }
 
     @Override
-    public boolean given() {
-        for (TaskCriterion criterion : criteria) {
-            boolean given = criterion.given();
-            if (checkAll && !given) {
-                return false;
-            } else if (!checkAll && given) {
-                return true;
-            }
-        }
-        return checkAll;
-    }
+    public abstract boolean given();
 
     @Override
     public void reset() {
@@ -67,4 +51,13 @@ public class GroupCriterion extends TaskCriterion {
         criteriaAction.accept(this);
     }
 
+    public void invokeManuals() {
+        for (TaskCriterion criterion : criteria) {
+            if (criterion instanceof ManualInvokeCriterion) {
+                ((ManualInvokeCriterion) criterion).invoke();
+            } else if (criterion instanceof GroupCriterion) {
+                ((GroupCriterion) criterion).invokeManuals();
+            }
+        }
+    }
 }
