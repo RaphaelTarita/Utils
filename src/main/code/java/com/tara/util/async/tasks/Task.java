@@ -1,11 +1,16 @@
 package com.tara.util.async.tasks;
 
-import com.tara.util.async.tasks.criteria.*;
+import com.tara.util.async.tasks.criteria.ANDGroupCriterion;
+import com.tara.util.async.tasks.criteria.GroupCriterion;
+import com.tara.util.async.tasks.criteria.ManualInvokeCriterion;
+import com.tara.util.async.tasks.criteria.ManualRevokeCriterion;
+import com.tara.util.async.tasks.criteria.TaskCriterion;
 import com.tara.util.async.tasks.lock.LockingAction;
 import com.tara.util.async.tasks.lock.TaskLock;
 import com.tara.util.async.tasks.procedure.ProcedureException;
 import com.tara.util.async.tasks.procedure.TaskProcedure;
 import com.tara.util.async.tasks.procedure.TaskProcedureException;
+import com.tara.util.id.TaskID;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -34,17 +39,17 @@ public class Task implements Runnable {
 
     public Task(String taskName, TaskProcedure taskProcedure, List<TaskCriterion> criteria) {
         this(
-            taskName,
-            taskProcedure,
-            new ANDGroupCriterion(criteria)
+                taskName,
+                taskProcedure,
+                new ANDGroupCriterion(criteria)
         );
     }
 
     public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion... criteria) {
         this(
-            taskName,
-            taskProcedure,
-            new ANDGroupCriterion(criteria)
+                taskName,
+                taskProcedure,
+                new ANDGroupCriterion(criteria)
         );
     }
 

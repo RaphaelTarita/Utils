@@ -1,8 +1,9 @@
 package com.tara.util.async.tasks.procedure;
 
-import com.tara.util.async.tasks.TaskID;
+import com.tara.util.id.TaskID;
 
 public class TaskProcedureException extends Exception {
+    private static final long serialVersionUID = -3254152062372880602L;
     private final ProcedureException plain;
     private final TaskID taskID;
 

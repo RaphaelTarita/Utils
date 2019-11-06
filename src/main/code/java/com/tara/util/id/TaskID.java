@@ -1,6 +1,4 @@
-package com.tara.util.async.tasks;
-
-import com.tara.util.id.HiLoIndex;
+package com.tara.util.id;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,11 +14,11 @@ public class TaskID implements Serializable {
         index = new HiLoIndex();
     }
 
-    String name() {
+    public String name() {
         return taskName;
     }
 
-    String index() {
+    public String index() {
         return index.toString();
     }
 

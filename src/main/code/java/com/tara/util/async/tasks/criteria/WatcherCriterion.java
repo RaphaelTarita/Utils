@@ -1,9 +1,10 @@
 package com.tara.util.async.tasks.criteria;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 public class WatcherCriterion<W> extends TaskCriterion {
-    private W watch;
+    private AtomicReference<W> watch;
     private Predicate<W> watcher;
 
     protected WatcherCriterion(W watch) {
@@ -11,11 +12,11 @@ public class WatcherCriterion<W> extends TaskCriterion {
     }
 
     protected W getWatch() {
-        return watch;
+        return watch.get();
     }
 
     protected void setWatch(W newWatch) {
-        watch = newWatch;
+        watch = new AtomicReference<>(newWatch);
     }
 
     protected void assignWatcher(Predicate<W> watcher) {
@@ -24,7 +25,7 @@ public class WatcherCriterion<W> extends TaskCriterion {
 
     public WatcherCriterion(W watch, Predicate<W> watcher) {
         super();
-        this.watch = watch;
+        this.watch = new AtomicReference<>(watch);
         this.watcher = watcher;
     }
 
@@ -35,7 +36,7 @@ public class WatcherCriterion<W> extends TaskCriterion {
 
     @Override
     public boolean given() {
-        return watcher.test(watch);
+        return watcher.test(watch.get());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.tara.util.async.tasks.lock;
 
-import com.tara.util.async.tasks.TaskID;
+import com.tara.util.id.TaskID;
 
 public class TaskLock {
     private final TaskID on;
