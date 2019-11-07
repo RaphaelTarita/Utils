@@ -130,6 +130,7 @@ public class Task implements Runnable {
                 lock.lift();
             } catch (ProcedureException ex) {
                 log.debug("Recovery failed, Task stays locked");
+                lock.liftRLock();
                 lock.renewOnException(new TaskProcedureException(ex, id));
             }
         }
@@ -145,6 +146,7 @@ public class Task implements Runnable {
             iterations++;
         } catch (ProcedureException ex) {
             log.debug("Exception occurred in Task, locking...");
+            lock.liftRLock();
             lock.lockOrRenewOnException(new TaskProcedureException(ex, id));
         }
     }
