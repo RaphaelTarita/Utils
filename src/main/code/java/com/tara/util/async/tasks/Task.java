@@ -128,7 +128,7 @@ public class Task implements Runnable {
                 taskProcedure.execute();
                 log.debug("Successfully recovered");
                 lock.lift();
-            } catch (ProcedureException ex) {
+            } catch (ProcedureException | RuntimeException ex) {
                 log.debug("Recovery failed, Task stays locked");
                 lock.liftRLock();
                 lock.renewOnException(new TaskProcedureException(ex, id));
