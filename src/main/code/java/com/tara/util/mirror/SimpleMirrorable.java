@@ -12,12 +12,7 @@ public class SimpleMirrorable<T> implements Mirrorable<SimpleMirrorable<T>> {
     }
 
     @Override
-    public Mirrorable<SimpleMirrorable<T>> mirrorWrap() {
-        return new SimpleMirrorable<>(Mirrors.mirror(value));
-    }
-
-    @Override
-    public SimpleMirrorable<T> get() {
-        return this;
+    public SimpleMirrorable<T> mirror() {
+        return new SimpleMirrorable<>(value);
     }
 }

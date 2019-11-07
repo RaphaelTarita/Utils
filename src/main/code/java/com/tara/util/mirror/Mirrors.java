@@ -9,15 +9,12 @@ public class Mirrors {
     private Mirrors() {
     }
 
-    public static <C> C port(Mirrorable<C> toPort, int mirrors) {
-        if (mirrors == 0) {
-            return toPort.get();
+    public static <C> C port(C toPort, int portIterations) {
+        C res = mirror(toPort);
+        for (int i = 1; i < portIterations; i++) {
+            res = mirror(res);
         }
-        Mirrorable<C> currentPortLocation = toPort.mirrorWrap();
-        for (int i = 1; i < mirrors; i++) {
-            currentPortLocation = currentPortLocation.mirrorWrap();
-        }
-        return currentPortLocation.get();
+        return res;
     }
 
     public static <C> C mirror(Mirrorable<C> toMirror) {
