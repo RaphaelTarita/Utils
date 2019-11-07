@@ -1,6 +1,5 @@
 package com.tara.util.async.tasks;
 
-import com.tara.util.async.tasks.criteria.TaskCriterion;
 import com.tara.util.async.tasks.criteria.TimeCriterion;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,10 +8,9 @@ import java.util.List;
 @Slf4j
 public class TaskScheduler implements Runnable {
     private List<Task> tasks;
-    private long updateCycle;
+    private SchedulerConfig config;
     private Task recoveryTask;
     private Task retryTask;
-    private TaskCriterion runCriterion;
     private long startTime;
 
     private void recoveryTaskImpl() {
@@ -40,12 +38,11 @@ public class TaskScheduler implements Runnable {
         }
         recoveryTask.schedule();
         retryTask.schedule();
-        runCriterion.startObservance();
+        config.runCriterion().startObservance();
     }
 
-    public TaskScheduler(List<Task> tasks, TaskCriterion runCriterion, long updateCycle, long recoverAfter, long retryAfter) {
-        this.runCriterion = runCriterion;
-        this.updateCycle = updateCycle;
+    public TaskScheduler(List<Task> tasks, SchedulerConfig config) {
+        this.config = config;
         this.tasks = tasks;
         startTime = 0;
 
@@ -53,7 +50,7 @@ public class TaskScheduler implements Runnable {
                 "RecoveryTask",
                 this::recoveryTaskImpl,
                 new TimeCriterion(
-                        recoverAfter
+                        config.recoverCycle()
                 )
         );
 
@@ -61,17 +58,9 @@ public class TaskScheduler implements Runnable {
                 "RetryTask",
                 this::retryTaskImpl,
                 new TimeCriterion(
-                        retryAfter
+                        config.retryCycle()
                 )
         );
-    }
-
-    public TaskScheduler(List<Task> tasks, TaskCriterion runCriterion, long updateCycle) {
-        this(tasks, runCriterion, updateCycle, -1, -1);
-    }
-
-    public TaskScheduler(List<Task> tasks, TaskCriterion runCriterion) {
-        this(tasks, runCriterion, 100);
     }
 
     @Override
@@ -80,8 +69,8 @@ public class TaskScheduler implements Runnable {
         log.info("TaskScheduler thread started");
         scheduleAll();
         try {
-            while (runCriterion.given()) {
-                Thread.sleep(updateCycle);
+            while (config.runCriterion().given()) {
+                Thread.sleep(config.updateCycle());
                 for (Task task : tasks) {
                     if (!task.scheduledForRetry()) {
                         Thread taskThread = new Thread(task, task.toString());
@@ -96,9 +85,14 @@ public class TaskScheduler implements Runnable {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } finally {
-            runCriterion.stopObservance();
+            config.runCriterion().stopObservance();
             log.info("TaskScheduler thread stopped after {} seconds.", (System.currentTimeMillis() - startTime) / 1000);
             startTime = 0;
         }
+    }
+
+    public void start() {
+        Thread taskSchedulerThread = new Thread(this, config.threadName());
+        taskSchedulerThread.start();
     }
 }
