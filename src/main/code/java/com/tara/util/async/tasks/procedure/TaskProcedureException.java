@@ -4,10 +4,10 @@ import com.tara.util.id.TaskID;
 
 public class TaskProcedureException extends Exception {
     private static final long serialVersionUID = -3254152062372880602L;
-    private final ProcedureException plain;
+    private final Exception plain;
     private final TaskID taskID;
 
-    public TaskProcedureException(ProcedureException plain, TaskID id) {
+    public TaskProcedureException(Exception plain, TaskID id) {
         this.plain = plain;
         this.taskID = id;
     }

@@ -144,7 +144,7 @@ public class Task implements Runnable {
             lock.liftRLock();
             retry = false;
             iterations++;
-        } catch (ProcedureException ex) {
+        } catch (ProcedureException | RuntimeException ex) {
             log.debug("Exception occurred in Task, locking...");
             lock.liftRLock();
             lock.lockOrRenewOnException(new TaskProcedureException(ex, id));
