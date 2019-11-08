@@ -1,5 +1,7 @@
 package com.tara.util.main;
 
+import com.tara.util.helper.decimal.FloatHelper;
+
 import java.io.PrintStream;
 
 public class InfoClass {
@@ -11,5 +13,7 @@ public class InfoClass {
                         + "\nThe function main() displays this information."
                         + "\nThere is no other purpose of this Class."
         );
+
+        OUT.println(FloatHelper.roundToInt(10.3));
     }
 }
