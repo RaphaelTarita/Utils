@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class TaskScheduler implements Runnable {
+public class TaskScheduler extends Thread {
     private List<Task> tasks;
     private SchedulerConfig config;
     private Task recoveryTask;
@@ -42,6 +42,7 @@ public class TaskScheduler implements Runnable {
     }
 
     public TaskScheduler(List<Task> tasks, SchedulerConfig config) {
+        super(config.threadName());
         this.config = config;
         this.tasks = tasks;
         startTime = 0;
@@ -73,26 +74,18 @@ public class TaskScheduler implements Runnable {
                 Thread.sleep(config.updateCycle());
                 for (Task task : tasks) {
                     if (!task.scheduledForRetry()) {
-                        Thread taskThread = new Thread(task, task.toString());
-                        taskThread.start();
+                        task.start();
                     }
                 }
-                Thread recovery = new Thread(recoveryTask, recoveryTask.toString());
-                Thread retry = new Thread(retryTask, retryTask.toString());
-                recovery.start();
-                retry.start();
+                recoveryTask.start();
+                retryTask.start();
             }
         } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
+            interrupt();
         } finally {
             config.runCriterion().stopObservance();
             log.info("TaskScheduler thread stopped after {} seconds.", (System.currentTimeMillis() - startTime) / 1000);
             startTime = 0;
         }
-    }
-
-    public void start() {
-        Thread taskSchedulerThread = new Thread(this, config.threadName());
-        taskSchedulerThread.start();
     }
 }
