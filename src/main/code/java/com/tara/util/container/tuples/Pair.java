@@ -1,6 +1,7 @@
 package com.tara.util.container.tuples;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -92,5 +93,25 @@ public class Pair<F, S> {
                         paramSecond
                 )
         );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj instanceof Pair) {
+            Pair<?, ?> casted = (Pair<?, ?>) obj;
+            return casted.first.equals(first)
+                    && casted.second.equals(second);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second);
     }
 }

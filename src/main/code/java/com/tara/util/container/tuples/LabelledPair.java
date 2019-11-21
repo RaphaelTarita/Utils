@@ -102,4 +102,22 @@ public class LabelledPair<F, S> extends Pair<F, S> {
     public Twin<String> asLabelTwin() {
         return new Twin<>(labelFirst, labelSecond);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj instanceof LabelledPair) {
+            return ((LabelledPair) obj).asPair().equals(this.asPair());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), labelFirst, labelSecond);
+    }
 }
