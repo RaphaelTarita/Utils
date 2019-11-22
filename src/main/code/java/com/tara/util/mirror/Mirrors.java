@@ -97,6 +97,10 @@ public class Mirrors {
         supplierRegistry.put(clazz, composeSupplier(clazz, supplier));
     }
 
+    public static <C> void unregisterSupplier(Class<C> clazz) {
+        supplierRegistry.remove(clazz);
+    }
+
     @SuppressWarnings("unchecked")
     private static <C> C copyWithRegisteredSupplier(C toCopy) {
         return (C) supplierRegistry.get(toCopy.getClass()).apply(toCopy);
