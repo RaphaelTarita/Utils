@@ -101,6 +101,10 @@ public class Mirrors {
         supplierRegistry.remove(clazz);
     }
 
+    public static void unregisterAllSuppliers() {
+        supplierRegistry = new HashMap<>();
+    }
+
     @SuppressWarnings("unchecked")
     private static <C> C copyWithRegisteredSupplier(C toCopy) {
         return (C) supplierRegistry.get(toCopy.getClass()).apply(toCopy);
