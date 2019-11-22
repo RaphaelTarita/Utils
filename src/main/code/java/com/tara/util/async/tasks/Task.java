@@ -28,6 +28,14 @@ public class Task extends Thread {
         criterion.reset();
     }
 
+    protected Task(String taskName, TaskCriterion criterion) {
+        this(taskName, null, criterion);
+    }
+
+    protected void setProcedure(TaskProcedure procedure) {
+        taskProcedure = procedure;
+    }
+
     public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion criterion) {
         super(taskName);
         id = new TaskID(taskName);
