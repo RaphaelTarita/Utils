@@ -23,7 +23,7 @@ public class SimpleMirrorable<T> implements Mirrorable<SimpleMirrorable<T>> {
 
     @Override
     public SimpleMirrorable<T> mirror() {
-        return new SimpleMirrorable<>(value);
+        return new SimpleMirrorable<>(Mirrors.mirror(value));
     }
 
     @Override

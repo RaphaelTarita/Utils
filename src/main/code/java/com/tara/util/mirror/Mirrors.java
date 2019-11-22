@@ -6,13 +6,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class Mirrors {
     private static final String CLONE_METHOD_NAME = "clone";
-    private static final String MSG_STARTER = ": ";
-    private static final String NO_CLONE = "Object implements Cloneable but does not have a clone() method";
-    private static final String NO_CLONE_ACCESS = "Object does not provide access to a clone() method";
-    private static final String CLONE_MALFORMED = "Object has a malformed clone() implementation and threw ";
+    private static HashMap<Class<?>, Function<Object, ?>> supplierRegistry = new HashMap<>();
 
     private Mirrors() {
     }
@@ -74,6 +73,8 @@ public class Mirrors {
             return (C) mirror((Collection<?>) toMirror);
         } else if (toMirror instanceof Map) {
             return (C) mirror((Map<?, ?>) toMirror);
+        } else if (supplierRegistry.containsKey(toMirror.getClass())) {
+            return copyWithRegisteredSupplier(toMirror);
         } else {
             return cloneGeneric(toMirror);
         }
@@ -90,5 +91,25 @@ public class Mirrors {
         } else {
             return generic;
         }
+    }
+
+    public static <C> void registerSupplier(Class<C> clazz, UnaryOperator<C> supplier) {
+        supplierRegistry.put(clazz, composeSupplier(clazz, supplier));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <C> C copyWithRegisteredSupplier(C toCopy) {
+        return (C) supplierRegistry.get(toCopy.getClass()).apply(toCopy);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <C> Function<Object, C> composeSupplier(Class<C> clazz, UnaryOperator<C> copyConstructor) {
+        return (Object o) -> {
+            if (clazz.isInstance(o)) {
+                return copyConstructor.apply((C) o);
+            } else {
+                throw new ClassCastException("Object" + o.toString() + "is not instance of Class " + clazz.toString());
+            }
+        };
     }
 }
