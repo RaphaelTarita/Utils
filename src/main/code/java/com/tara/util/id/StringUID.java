@@ -1,15 +1,21 @@
 package com.tara.util.id;
 
+import com.tara.util.tools.CharRandom;
+
 import java.util.HashSet;
+import java.util.Objects;
 
 public class StringUID implements UID<String> {
     private static final long serialVersionUID = 9114740774376532987L;
+    private static final int MAX_RANDOM_ID_LENGTH = 50;
 
     private static HashSet<String> takenStrings = new HashSet<>();
+    private static final CharRandom random = new CharRandom();
 
     private String string;
 
     private void register(String str) {
+        Objects.requireNonNull(str);
         if (!taken(str)) {
             string = str;
             takenStrings.add(string);
@@ -23,10 +29,9 @@ public class StringUID implements UID<String> {
     }
 
     public StringUID() {
-        //TODO add random char generator
-        String str = "random";
+        String str = random.randomString(MAX_RANDOM_ID_LENGTH);
         while (taken(str)) {
-            str = "newRandom";
+            str = random.randomString(MAX_RANDOM_ID_LENGTH);
         }
         register(str);
     }
@@ -46,5 +51,25 @@ public class StringUID implements UID<String> {
     @Override
     public String getGenerator() {
         return null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        return (obj instanceof StringUID)
+                && ((StringUID) obj).string.equals(string);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(string);
+    }
+
+    @Override
+    public String toString() {
+        return "StringUID{ " + string + " }";
     }
 }
