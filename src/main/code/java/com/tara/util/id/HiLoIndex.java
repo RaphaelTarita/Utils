@@ -1,9 +1,8 @@
 package com.tara.util.id;
 
-import java.io.Serializable;
 import java.util.Objects;
 
-public class HiLoIndex implements Serializable {
+public class HiLoIndex implements UID<Long> {
     private static final long serialVersionUID = 62459995810455813L;
 
     private enum HiLo {
@@ -52,6 +51,25 @@ public class HiLoIndex implements Serializable {
     }
 
     public long toLong() {
+        return index;
+    }
+
+    @Override
+    public boolean taken(Long idGenerator) {
+        return idGenerator > loIndex && idGenerator < hiIndex;
+    }
+
+    @Override
+    public UID<Long> newUnique(Long generator) {
+        if (taken(generator)) {
+            return new HiLoIndex();
+        } else {
+            return new HiLoIndex(generator);
+        }
+    }
+
+    @Override
+    public Long getGenerator() {
         return index;
     }
 
