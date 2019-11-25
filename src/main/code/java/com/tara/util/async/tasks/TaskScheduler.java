@@ -1,26 +1,29 @@
 package com.tara.util.async.tasks;
 
 import com.tara.util.async.tasks.criteria.TimeCriterion;
+import com.tara.util.id.TaskID;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class TaskScheduler extends Thread {
-    private List<Task> tasks;
+    private Map<TaskID, Task> tasks;
     private SchedulerConfig config;
     private Task recoveryTask;
     private Task retryTask;
     private long startTime;
 
     private void recoveryTaskImpl() {
-        for (Task task : tasks) {
+        for (Task task : tasks.values()) {
             task.recover();
         }
     }
 
     private void retryTaskImpl() {
-        for (Task task : tasks) {
+        for (Task task : tasks.values()) {
             if (task.scheduledForRetry()) {
                 log.info("retrying task {}...", task);
                 if (task.rlocked()) {
@@ -33,7 +36,7 @@ public class TaskScheduler extends Thread {
     }
 
     private void scheduleAll() {
-        for (Task task : tasks) {
+        for (Task task : tasks.values()) {
             task.schedule();
         }
         recoveryTask.schedule();
@@ -44,7 +47,10 @@ public class TaskScheduler extends Thread {
     public TaskScheduler(List<Task> tasks, SchedulerConfig config) {
         super(config.threadName());
         this.config = config;
-        this.tasks = tasks;
+        this.tasks = new HashMap<>();
+        for (Task t : tasks) {
+            this.tasks.put(t.id(), t);
+        }
         startTime = 0;
 
         recoveryTask = new Task(
@@ -64,6 +70,19 @@ public class TaskScheduler extends Thread {
         );
     }
 
+    public Task getTask(TaskID taskID) {
+        return tasks.get(taskID);
+    }
+
+    public ProgressTask getProgressTask(TaskID taskID) {
+        Task task = tasks.get(taskID);
+        if (task instanceof ProgressTask) {
+            return (ProgressTask) task;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void run() {
         startTime = System.currentTimeMillis();
@@ -72,7 +91,7 @@ public class TaskScheduler extends Thread {
         try {
             while (config.runCriterion().given()) {
                 Thread.sleep(config.updateCycle());
-                for (Task task : tasks) {
+                for (Task task : tasks.values()) {
                     if (!task.scheduledForRetry()) {
                         task.start();
                     }

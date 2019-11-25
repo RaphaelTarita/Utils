@@ -1,4 +1,4 @@
-package com.tara.util.container.tuples;
+package com.tara.util.container.tuple;
 
 import java.util.Map;
 import java.util.Objects;

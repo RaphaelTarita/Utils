@@ -1,6 +1,6 @@
-package com.tara.util.container.tuples;
+package com.tara.util.container.tuple;
 
-import com.tara.util.container.labels.Labelled;
+import com.tara.util.container.label.Labelled;
 
 import java.util.Objects;
 

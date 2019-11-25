@@ -1,4 +1,4 @@
-package com.tara.util.container.labels;
+package com.tara.util.container.label;
 
 import java.util.Objects;
 

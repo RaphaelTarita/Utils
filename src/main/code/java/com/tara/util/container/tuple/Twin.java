@@ -1,4 +1,4 @@
-package com.tara.util.container.tuples;
+package com.tara.util.container.tuple;
 
 import java.util.List;
 import java.util.Set;
