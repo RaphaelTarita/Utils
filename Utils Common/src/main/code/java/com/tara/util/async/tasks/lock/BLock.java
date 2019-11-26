@@ -35,10 +35,12 @@ public class BLock extends BaseLock {
     @Override
     public String toString() {
         return "BLock due to exception \'"
-            + (reason != null
-            ? reason.toString()
-            : "<null>")
-            + "\', since "
-            + since.toString();
+                + (
+                reason != null
+                        ? reason.toString()
+                        : "<null>"
+        )
+                + "\', since "
+                + since.toString();
     }
 }
