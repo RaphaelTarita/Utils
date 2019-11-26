@@ -17,6 +17,11 @@
             <artifactId>auto-service</artifactId>
             <version>1.0-rc6</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.googlejavaformat</groupId>
+            <artifactId>google-java-format</artifactId>
+            <version>1.7</version>
+        </dependency>
     </dependencies>
 
 

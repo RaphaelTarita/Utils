@@ -1,6 +1,8 @@
 package com.tara.util.annotation.processor;
 
 import com.google.auto.service.AutoService;
+import com.google.googlejavaformat.java.Formatter;
+import com.google.googlejavaformat.java.FormatterException;
 import com.tara.util.annotation.Static;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -87,10 +89,13 @@ public class StaticProcessor extends AbstractProcessor {
         } catch (IOException ex) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "@Static annotation processing encountered IOException: " + ex.toString());
             return false;
+        } catch (FormatterException ex) {
+            processingEnv.getMessager().printMessage(Kind.ERROR, "@Static annotation processing encountered FormatterException: " + ex.toString());
+            return false;
         }
     }
 
-    private void generate(Map<Element, AnnotationInfo> toImplement) throws IOException {
+    private void generate(Map<Element, AnnotationInfo> toImplement) throws IOException, FormatterException {
         Map<String, List<MethodInfo>> files = new HashMap<>();
         for (Map.Entry<Element, AnnotationInfo> entry : toImplement.entrySet()) {
             String fullName = ((TypeElement) entry.getKey().getEnclosingElement()).getQualifiedName().toString();
@@ -135,53 +140,85 @@ public class StaticProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeFile(String on, List<MethodInfo> infos) throws IOException {
-        JavaFileObject file = processingEnv.getFiler().createSourceFile(on);
-        PrintWriter out = new PrintWriter(file.openWriter());
-        header(out, infos.get(0));
+    private void writeFile(String on, List<MethodInfo> infos) throws FormatterException, IOException {
+        StringBuilder res = new StringBuilder();
+        header(res, infos.get(0));
         for (MethodInfo info : infos) {
-            method(out, info);
+            method(res, info);
         }
-        out.println(Operator.BRACE_CLOSE);
-        out.close();
+        res.append(Operator.BRACE_CLOSE);
+        Formatter fmt = new Formatter();
+        String formatted = fmt.formatSource(res.toString());
+
+        JavaFileObject file = processingEnv.getFiler().createSourceFile(on);
+        try (PrintWriter out = new PrintWriter(file.openWriter())) {
+            out.println(formatted);
+        } catch (IOException ex) {
+            processingEnv.getMessager().printMessage(Kind.ERROR, "@Static annotation processing encountered IOException: " + ex.toString());
+        }
     }
 
-    private void header(PrintWriter out, MethodInfo info) {
+    private void header(StringBuilder out, MethodInfo info) {
         if (!info.getNewPackageName().isEmpty()) {
-            // package [new package name]; NOSONAR
-            out.println(Keyword.PACKAGE.toString() + SPACE + info.getNewPackageName() + Operator.SEMICOLON.toString());
+            out.append(Keyword.PACKAGE)
+               .append(SPACE)
+               .append(info.getNewPackageName())
+               .append(Operator.SEMICOLON)
+               .append(NEWLINE);
         }
-        // import [old class full name]; NOSONAR
-        out.println(Keyword.IMPORT.toString() + SPACE + info.getOriginalFullname() + Operator.SEMICOLON.toString());
-
-        // public class [new class name] { NOSONAR
-        out.println(Keyword.PUBLIC.toString() + SPACE + Keyword.CLASS.toString() + SPACE + info.getNewClassname() + SPACE + Operator.BRACE_OPEN.toString());
+        out.append(Keyword.IMPORT)
+           .append(SPACE)
+           .append(info.getOriginalFullname())
+           .append(Operator.SEMICOLON)
+           .append(NEWLINE)
+           .append(Keyword.PUBLIC)
+           .append(SPACE)
+           .append(Keyword.CLASS)
+           .append(SPACE)
+           .append(info.getNewClassname())
+           .append(SPACE)
+           .append(Operator.BRACE_OPEN)
+           .append(NEWLINE)
+           .append(Keyword.PRIVATE)
+           .append(SPACE)
+           .append(info.getNewClassname())
+           .append(Operator.PARENTHESIS_OPEN)
+           .append(Operator.PARENTHESIS_CLOSE)
+           .append(SPACE)
+           .append(Operator.BRACE_OPEN)
+           .append(NEWLINE)
+           .append(Operator.BRACE_CLOSE)
+           .append(NEWLINE);
     }
 
-    private void method(PrintWriter out, MethodInfo info) {
-        for (Modifier m : info.getMethod().getModifiers()) {
-            out.print(m.toString() + ' ');
-        }
+    private void method(StringBuilder out, MethodInfo info) {
         List<String> parameterNames = new ArrayList<>();
         String returnType = ((ExecutableType) info.getMethod().asType()).getReturnType().toString();
 
-        out.println(
-                Keyword.STATIC.toString() + SPACE
-                        + returnType + SPACE
-                        + info.getMethod().getSimpleName().toString()
-                        + Operator.PARENTHESIS_OPEN.toString()
-                        + getParameters(info.getOriginalClassname(), ((ExecutableType) info.getMethod().asType()).getParameterTypes(), parameterNames)
-                        + Operator.PARENTHESIS_CLOSE.toString() + SPACE
-                        + Operator.BRACE_OPEN
-        );
+        out.append(Keyword.PUBLIC)
+           .append(SPACE)
+           .append(Keyword.STATIC)
+           .append(SPACE)
+           .append(returnType)
+           .append(SPACE)
+           .append(info.getMethod().getSimpleName().toString())
+           .append(Operator.PARENTHESIS_OPEN)
+           .append(getParameters(info.getOriginalClassname(), ((ExecutableType) info.getMethod().asType()).getParameterTypes(), parameterNames))
+           .append(Operator.PARENTHESIS_CLOSE)
+           .append(SPACE)
+           .append(Operator.BRACE_OPEN)
+           .append(NEWLINE);
 
         if (returnType.equals(Keyword.VOID.toString())) {
-            out.println(bodyForVoid(info, parameterNames));
+            out.append(bodyForVoid(info, parameterNames))
+               .append(NEWLINE);
         } else {
-            out.println(bodyForNonvoid(info, parameterNames));
+            out.append(bodyForNonvoid(info, parameterNames))
+               .append(NEWLINE);
         }
 
-        out.println(Operator.BRACE_CLOSE);
+        out.append(Operator.BRACE_CLOSE)
+           .append(NEWLINE);
     }
 
     private String bodyForVoid(MethodInfo info, List<String> params) {
