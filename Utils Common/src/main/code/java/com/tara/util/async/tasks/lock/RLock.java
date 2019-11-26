@@ -8,7 +8,6 @@ public class RLock extends BaseLock {
         action = null;
     }
 
-
     public void activate(LockingAction action) {
         activate();
         this.action = action;
@@ -33,14 +32,15 @@ public class RLock extends BaseLock {
         this.action = null;
     }
 
-
     @Override
     public String toString() {
         return "RLock due to action \'"
-            + (action != null
-            ? action.toString()
-            : "<null>")
-            + "\', since "
-            + since.toString();
+                + (
+                action != null
+                        ? action.toString()
+                        : "<null>"
+        )
+                + "\', since "
+                + since.toString();
     }
 }
