@@ -21,7 +21,7 @@ public class ChainCriterion extends TaskCriterion {
 
     @Override
     public void startObservance() {
-        observed = true;
+        super.startObservance();
         start = preTask.iterations();
     }
 

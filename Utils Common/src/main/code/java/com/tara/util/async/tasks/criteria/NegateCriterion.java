@@ -4,6 +4,7 @@ public class NegateCriterion extends TaskCriterion {
     private TaskCriterion criterion;
 
     public NegateCriterion(TaskCriterion criterion) {
+        super();
         this.criterion = criterion;
     }
 

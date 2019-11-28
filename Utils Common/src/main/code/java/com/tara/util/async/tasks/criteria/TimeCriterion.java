@@ -12,7 +12,7 @@ public class TimeCriterion extends TaskCriterion {
 
     @Override
     public void startObservance() {
-        observed = true;
+        super.startObservance();
         start = System.currentTimeMillis();
     }
 

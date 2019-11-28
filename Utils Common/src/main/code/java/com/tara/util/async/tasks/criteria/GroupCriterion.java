@@ -10,6 +10,7 @@ public abstract class GroupCriterion extends TaskCriterion {
     protected List<TaskCriterion> criteria;
 
     protected GroupCriterion(List<TaskCriterion> criteria) {
+        super();
         this.criteria = criteria;
     }
 
@@ -22,7 +23,9 @@ public abstract class GroupCriterion extends TaskCriterion {
     }
 
     public void add(TaskCriterion criterion) {
-        criterion.startObservance();
+        if (observed) {
+            criterion.startObservance();
+        }
         criteria.add(criterion);
     }
 
@@ -37,7 +40,6 @@ public abstract class GroupCriterion extends TaskCriterion {
 
     @Override
     public void reset() {
-
         criteria.forEach(TaskCriterion::reset);
     }
 
