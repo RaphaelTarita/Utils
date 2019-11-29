@@ -21,7 +21,7 @@ public class TimeCriterion extends TaskCriterion {
         if (millis == -1) {
             return false;
         }
-        return observed && millis < System.currentTimeMillis() - start;
+        return requireObservance(millis < System.currentTimeMillis() - start);
     }
 
     @Override

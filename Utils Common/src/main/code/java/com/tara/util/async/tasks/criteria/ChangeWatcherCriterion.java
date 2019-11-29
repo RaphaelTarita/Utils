@@ -16,12 +16,11 @@ public class ChangeWatcherCriterion<W> extends WatcherCriterion<W> {
     @Override
     public void startObservance() {
         super.startObservance();
-        original = copySupplier.apply(getWatch());
+        reset();
     }
 
     @Override
     public void reset() {
-        super.reset();
         original = copySupplier.apply(getWatch());
     }
 }

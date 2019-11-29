@@ -20,7 +20,7 @@ public class ManualRevokeCriterion extends TaskCriterion {
 
     @Override
     public boolean given() {
-        return observed && !revoke;
+        return requireObservance(!revoke);
     }
 
     @Override

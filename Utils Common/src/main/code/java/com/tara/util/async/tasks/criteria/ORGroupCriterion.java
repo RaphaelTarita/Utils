@@ -19,9 +19,9 @@ public class ORGroupCriterion extends GroupCriterion {
     public boolean given() {
         for (TaskCriterion criterion : criteria) {
             if (criterion.given()) {
-                return true;
+                return requireObservance(true);
             }
         }
-        return false;
+        return requireObservance(false);
     }
 }

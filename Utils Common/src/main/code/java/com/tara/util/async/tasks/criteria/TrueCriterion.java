@@ -9,7 +9,7 @@ public class TrueCriterion extends TaskCriterion {
 
     @Override
     public boolean given() {
-        return TRUE;
+        return requireObservance(TRUE);
     }
 
     @Override

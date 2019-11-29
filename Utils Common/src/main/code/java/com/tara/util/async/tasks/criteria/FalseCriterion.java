@@ -9,7 +9,7 @@ public class FalseCriterion extends TaskCriterion {
 
     @Override
     public boolean given() {
-        return FALSE;
+        return requireObservance(FALSE);
     }
 
     @Override

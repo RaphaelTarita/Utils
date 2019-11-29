@@ -31,7 +31,7 @@ public class WatcherCriterion<W> extends TaskCriterion {
 
     @Override
     public boolean given() {
-        return watcher.test(watch.get());
+        return requireObservance(watcher.test(watch.get()));
     }
 
     @Override

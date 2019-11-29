@@ -16,7 +16,7 @@ public class NegateCriterion extends TaskCriterion {
 
     @Override
     public boolean given() {
-        return !criterion.given();
+        return requireObservance(!criterion.given());
     }
 
     @Override
