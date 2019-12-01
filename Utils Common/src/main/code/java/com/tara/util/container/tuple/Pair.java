@@ -1,11 +1,14 @@
 package com.tara.util.container.tuple;
 
+import com.tara.util.mirror.Mirrorable;
+import com.tara.util.mirror.Mirrors;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-public class Pair<F, S> {
+public class Pair<F, S> implements Mirrorable<Pair<F, S>> {
     private static class PairEntry<FK, SV> implements Map.Entry<FK, SV> {
         private FK firstOrKey;
         private SV secondOrValue;
@@ -92,6 +95,14 @@ public class Pair<F, S> {
                         second,
                         paramSecond
                 )
+        );
+    }
+
+    @Override
+    public Pair<F, S> mirror() {
+        return new Pair<>(
+                Mirrors.mirror(first),
+                Mirrors.mirror(second)
         );
     }
 

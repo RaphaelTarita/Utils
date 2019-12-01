@@ -1,8 +1,11 @@
 package com.tara.util.container.label;
 
+import com.tara.util.mirror.Mirrorable;
+import com.tara.util.mirror.Mirrors;
+
 import java.util.Objects;
 
-public class SimpleLabelled<T> implements Labelled<T> {
+public class SimpleLabelled<T> implements Labelled<T>, Mirrorable<SimpleLabelled<T>> {
     private T value;
     private String label;
 
@@ -40,6 +43,11 @@ public class SimpleLabelled<T> implements Labelled<T> {
 
     public void labelSelf() {
         label = valOrNull();
+    }
+
+    @Override
+    public SimpleLabelled<T> mirror() {
+        return new SimpleLabelled<>(Mirrors.mirror(value), label);
     }
 
     @Override

@@ -104,6 +104,17 @@ public class LabelledPair<F, S> extends Pair<F, S> {
     }
 
     @Override
+    public LabelledPair<F, S> mirror() {
+        Pair<F, S> superPair = super.mirror();
+        return new LabelledPair<>(
+                superPair.first,
+                labelFirst,
+                superPair.second,
+                labelSecond
+        );
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
