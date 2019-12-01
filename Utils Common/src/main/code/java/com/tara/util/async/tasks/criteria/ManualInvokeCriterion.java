@@ -13,12 +13,6 @@ public class ManualInvokeCriterion extends TaskCriterion {
     }
 
     @Override
-    public void startObservance() {
-        super.startObservance();
-        invoke = false;
-    }
-
-    @Override
     public boolean given() {
         return requireObservance(invoke);
     }

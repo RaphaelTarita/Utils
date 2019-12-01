@@ -10,7 +10,7 @@ public class NegateCriterion extends TaskCriterion {
 
     @Override
     public void startObservance() {
-        super.startObservance();
+        observed = true;
         criterion.startObservance();
     }
 

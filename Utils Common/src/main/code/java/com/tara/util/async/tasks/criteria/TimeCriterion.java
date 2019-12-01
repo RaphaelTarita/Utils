@@ -11,12 +11,6 @@ public class TimeCriterion extends TaskCriterion {
     }
 
     @Override
-    public void startObservance() {
-        super.startObservance();
-        start = System.currentTimeMillis();
-    }
-
-    @Override
     public boolean given() {
         if (millis == -1) {
             return false;

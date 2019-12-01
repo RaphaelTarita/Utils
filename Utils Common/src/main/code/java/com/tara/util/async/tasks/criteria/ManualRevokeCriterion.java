@@ -13,12 +13,6 @@ public class ManualRevokeCriterion extends TaskCriterion {
     }
 
     @Override
-    public void startObservance() {
-        super.startObservance();
-        revoke = false;
-    }
-
-    @Override
     public boolean given() {
         return requireObservance(!revoke);
     }

@@ -12,6 +12,7 @@ public abstract class TaskCriterion {
     }
 
     public void startObservance() {
+        reset();
         observed = true;
     }
 

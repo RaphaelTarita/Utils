@@ -20,12 +20,6 @@ public class ChainCriterion extends TaskCriterion {
     }
 
     @Override
-    public void startObservance() {
-        super.startObservance();
-        start = preTask.iterations();
-    }
-
-    @Override
     public boolean given() {
         return requireObservance(iterations <= preTask.iterations() - start);
     }

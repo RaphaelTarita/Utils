@@ -14,12 +14,6 @@ public class ChangeWatcherCriterion<W> extends WatcherCriterion<W> {
     }
 
     @Override
-    public void startObservance() {
-        super.startObservance();
-        reset();
-    }
-
-    @Override
     public void reset() {
         original = copySupplier.apply(getWatch());
     }

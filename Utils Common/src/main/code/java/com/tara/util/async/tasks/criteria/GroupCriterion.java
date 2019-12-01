@@ -31,7 +31,7 @@ public abstract class GroupCriterion extends TaskCriterion {
 
     @Override
     public void startObservance() {
-        super.startObservance();
+        observed = true;
         criteria.forEach(TaskCriterion::startObservance);
     }
 
