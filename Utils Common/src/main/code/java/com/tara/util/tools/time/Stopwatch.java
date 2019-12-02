@@ -1,4 +1,4 @@
-package com.tara.util.tools;
+package com.tara.util.tools.time;
 
 import java.time.Duration;
 
