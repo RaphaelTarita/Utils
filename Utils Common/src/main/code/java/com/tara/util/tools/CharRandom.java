@@ -79,11 +79,6 @@ public class CharRandom implements Mirrorable<CharRandom> {
     }
 
     @Override
-    public CharRandom mirror() {
-        return new CharRandom(Mirrors.mirror(chars));
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
@@ -101,6 +96,11 @@ public class CharRandom implements Mirrorable<CharRandom> {
     @Override
     public String toString() {
         return "CharRandom (charset: " + (new TreeSet<>(chars)).toString() + ")";
+    }
+
+    @Override
+    public CharRandom mirror() {
+        return new CharRandom(Mirrors.mirror(chars));
     }
 
     public static Character randStatic() {

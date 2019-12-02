@@ -33,6 +33,26 @@ public class Pair<F, S> implements Mirrorable<Pair<F, S>> {
             secondOrValue = value;
             return secondOrValue;
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(firstOrKey, secondOrValue);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (!(o instanceof PairEntry)) {
+                return false;
+            }
+
+            PairEntry<?, ?> pairEntry = (PairEntry<?, ?>) o;
+            return firstOrKey.equals(pairEntry.firstOrKey) &&
+                    secondOrValue.equals(pairEntry.secondOrValue);
+        }
     }
 
     protected F first;

@@ -53,8 +53,8 @@ public class SimpleLabelled<T> implements Labelled<T>, Mirrorable<SimpleLabelled
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof Labelled)
-                && ((Labelled) obj).value().equals(value)
-                && ((Labelled) obj).label().equals(label);
+                && ((Labelled<?>) obj).value().equals(value)
+                && ((Labelled<?>) obj).label().equals(label);
     }
 
     @Override

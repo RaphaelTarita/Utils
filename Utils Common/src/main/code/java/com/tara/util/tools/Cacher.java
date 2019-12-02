@@ -1,13 +1,16 @@
 package com.tara.util.tools;
 
+import com.tara.util.mirror.Mirrorable;
+import com.tara.util.mirror.Mirrors;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class Cacher<I, O> {
-    private HashMap<I, O> cache;
+public class Cacher<I, O> implements Mirrorable<Cacher<I, O>> {
+    private Map<I, O> cache;
     private Function<I, O> function;
 
     public Cacher(Cacher<I, O> from) {
@@ -74,5 +77,12 @@ public class Cacher<I, O> {
         } else {
             return cache(input);
         }
+    }
+
+    @Override
+    public Cacher<I, O> mirror() {
+        Cacher<I, O> cacher = new Cacher<>(function);
+        cacher.cache = Mirrors.mirror(cache);
+        return cacher;
     }
 }
