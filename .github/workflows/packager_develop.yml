@@ -1,4 +1,4 @@
-name: Java CI
+name: Deploy SNAPSHOT (develop)
 
 on:
   push:
