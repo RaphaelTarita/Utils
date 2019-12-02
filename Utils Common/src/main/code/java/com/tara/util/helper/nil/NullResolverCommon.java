@@ -5,7 +5,7 @@ import java.util.function.BiPredicate;
 
 public abstract class NullResolverCommon implements NullResolver {
     private static boolean modeNotSupported(EqualsMode mode) {
-        throw new UnsupportedOperationException("Null Equals mode \'" + mode.name() + "\' is not supported");
+        throw new UnsupportedOperationException("Null Equals mode '" + mode.name() + "' is not supported");
     }
 
     private final NullResolverImpl impl;
