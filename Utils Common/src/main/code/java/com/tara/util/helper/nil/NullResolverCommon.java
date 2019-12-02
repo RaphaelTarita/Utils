@@ -3,7 +3,7 @@ package com.tara.util.helper.nil;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 
-public abstract class NullResolverCommon {
+public abstract class NullResolverCommon implements NullResolver {
     private static boolean modeNotSupported(EqualsMode mode) {
         throw new UnsupportedOperationException("Null Equals mode \'" + mode.name() + "\' is not supported");
     }
@@ -53,10 +53,12 @@ public abstract class NullResolverCommon {
         return equalsArray(this::equalsOneNullTrue, ops);
     }
 
+    @Override
     public NullResolverImpl impl() {
         return impl;
     }
 
+    @Override
     public boolean nullEquals(EqualsMode mode, Object lop, Object rop) {
         switch (mode) {
             case NULL_FALSE:
@@ -70,6 +72,7 @@ public abstract class NullResolverCommon {
         }
     }
 
+    @Override
     public boolean nullEquals(EqualsMode mode, Object... ops) {
         switch (mode) {
             case NULL_FALSE:
@@ -85,7 +88,7 @@ public abstract class NullResolverCommon {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof InternalNullResolverCustom;
+        return obj instanceof BasicNullResolver;
     }
 
     @Override

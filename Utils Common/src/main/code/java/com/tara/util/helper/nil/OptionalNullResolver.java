@@ -9,9 +9,14 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class InternalNullResolverOptional extends NullResolverCommon implements NullResolver {
+public class OptionalNullResolver extends NullResolverCommon {
+    private static final OptionalNullResolver instance = new OptionalNullResolver();
 
-    public InternalNullResolverOptional() {
+    public static OptionalNullResolver instance() {
+        return instance;
+    }
+
+    public OptionalNullResolver() {
         super(NullResolverImpl.OPTIONAL);
     }
 

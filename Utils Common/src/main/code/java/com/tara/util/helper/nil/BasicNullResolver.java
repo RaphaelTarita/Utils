@@ -7,10 +7,15 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class InternalNullResolverCustom extends NullResolverCommon implements NullResolver {
+public class BasicNullResolver extends NullResolverCommon {
+    private static final BasicNullResolver instance = new BasicNullResolver();
 
-    public InternalNullResolverCustom() {
-        super(NullResolverImpl.CUSTOM);
+    public static BasicNullResolver instance() {
+        return instance;
+    }
+
+    private BasicNullResolver() {
+        super(NullResolverImpl.BASIC);
     }
 
     @Override
