@@ -28,5 +28,13 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub RaphaelTarita Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/RaphaelTarita/Utils</url>
+        </repository>
+    </distributionManagement>
+
 
 </project>
