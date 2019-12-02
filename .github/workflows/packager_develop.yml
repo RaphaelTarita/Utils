@@ -18,7 +18,7 @@ jobs:
         java-version: 11
     - name: Maven Deploy
       env:
-        GITHUB_USERNAME: x-access-token
+        GITHUB_USERNAME: RaphaelTarita
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: mvn --settings settings.xml deploy
       
