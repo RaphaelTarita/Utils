@@ -18,8 +18,8 @@ jobs:
           java-version: 11
       - name: Maven Deploy
         env:
-          GITHUB_USERNAME: RaphaelTarita
-          GITHUB_TOKEN: 60102b9a4a890d1d176e5921e3481b577feff2ea
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --settings settings.xml -B -e -Dmaven.wagon.http.pool=false clean deploy
 
 
