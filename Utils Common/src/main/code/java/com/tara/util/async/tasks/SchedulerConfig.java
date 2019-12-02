@@ -2,8 +2,9 @@ package com.tara.util.async.tasks;
 
 import com.tara.util.async.tasks.criteria.TaskCriterion;
 import com.tara.util.async.tasks.criteria.TrueCriterion;
+import com.tara.util.mirror.Mirrorable;
 
-public class SchedulerConfig {
+public class SchedulerConfig implements Mirrorable<SchedulerConfig> {
     private final TaskCriterion runCriterion;
     private final long updateCycle;
     private final long recoverCycle;
@@ -38,7 +39,7 @@ public class SchedulerConfig {
         return threadName;
     }
 
-    public static class Builder {
+    public static class Builder implements Mirrorable<Builder> {
         private TaskCriterion builderRunCriterion;
         private long builderUpdateCycle;
         private long builderRecoverCyle;
@@ -95,6 +96,16 @@ public class SchedulerConfig {
                     builderThreadName
             );
         }
+
+        @Override
+        public Builder mirror() {
+            return (new Builder())
+                    .withRunCriterion(builderRunCriterion.mirror())
+                    .withUpdateCycle(builderUpdateCycle)
+                    .withRecoverCycle(builderRecoverCyle)
+                    .withRetryCycle(builderRetryCycle)
+                    .withThreadName(builderThreadName);
+        }
     }
 
     public static Builder builder() {
@@ -103,5 +114,10 @@ public class SchedulerConfig {
 
     public Builder thisBuilder() {
         return new Builder(this);
+    }
+
+    @Override
+    public SchedulerConfig mirror() {
+        return thisBuilder().mirror().build();
     }
 }

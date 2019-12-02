@@ -12,7 +12,6 @@ public class ChainCriterion extends TaskCriterion {
         this.preTask = preTask;
         this.iterations = iterations;
         start = 0;
-        observed = false;
     }
 
     public ChainCriterion(Task preTask) {
@@ -27,5 +26,12 @@ public class ChainCriterion extends TaskCriterion {
     @Override
     public void reset() {
         start = preTask.iterations();
+    }
+
+    @Override
+    public ChainCriterion mirror() {
+        ChainCriterion crit = new ChainCriterion(preTask.mirror(), iterations);
+        crit.start = this.start;
+        return withObservanceState(crit);
     }
 }

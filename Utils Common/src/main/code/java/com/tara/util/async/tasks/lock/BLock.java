@@ -1,5 +1,7 @@
 package com.tara.util.async.tasks.lock;
 
+import com.tara.util.mirror.Mirrors;
+
 public class BLock extends BaseLock {
     private Exception reason;
 
@@ -34,13 +36,23 @@ public class BLock extends BaseLock {
 
     @Override
     public String toString() {
-        return "BLock due to exception \'"
+        return "BLock due to exception '"
                 + (
                 reason != null
                         ? reason.toString()
                         : "<null>"
         )
-                + "\', since "
+                + "', since "
                 + since.toString();
+    }
+
+    @Override
+    public BLock mirror() {
+        BLock lock = new BLock();
+        if (locks()) {
+            lock.activate(Mirrors.mirror(reason));
+        }
+        lock.since = Mirrors.mirror(since);
+        return lock;
     }
 }

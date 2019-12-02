@@ -1,5 +1,7 @@
 package com.tara.util.async.tasks.lock;
 
+import com.tara.util.mirror.Mirrors;
+
 public class RLock extends BaseLock {
     private LockingAction action;
 
@@ -34,13 +36,23 @@ public class RLock extends BaseLock {
 
     @Override
     public String toString() {
-        return "RLock due to action \'"
+        return "RLock due to action '"
                 + (
                 action != null
                         ? action.toString()
                         : "<null>"
         )
-                + "\', since "
+                + "', since "
                 + since.toString();
+    }
+
+    @Override
+    public RLock mirror() {
+        RLock lock = new RLock();
+        if (locks()) {
+            lock.activate(action);
+        }
+        lock.since = Mirrors.mirror(since);
+        return lock;
     }
 }

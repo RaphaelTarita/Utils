@@ -22,4 +22,11 @@ public class TimeCriterion extends TaskCriterion {
     public void reset() {
         start = System.currentTimeMillis();
     }
+
+    @Override
+    public TimeCriterion mirror() {
+        TimeCriterion crit = new TimeCriterion(millis);
+        crit.start = this.start;
+        return withObservanceState(crit);
+    }
 }

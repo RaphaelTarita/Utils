@@ -29,4 +29,9 @@ public class NegateCriterion extends TaskCriterion {
         super.stopObservance();
         criterion.stopObservance();
     }
+
+    @Override
+    public TaskCriterion mirror() {
+        return withObservanceState(new NegateCriterion(criterion.mirror()));
+    }
 }

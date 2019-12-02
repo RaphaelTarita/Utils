@@ -2,14 +2,17 @@ package com.tara.util.async.tasks;
 
 import com.tara.util.async.tasks.criteria.TimeCriterion;
 import com.tara.util.id.TaskID;
+import com.tara.util.mirror.Mirrorable;
+import com.tara.util.mirror.Mirrors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class TaskScheduler extends Thread {
+public class TaskScheduler extends Thread implements Mirrorable<TaskScheduler> {
     private Map<TaskID, Task> tasks;
     private SchedulerConfig config;
     private Task recoveryTask;
@@ -106,5 +109,19 @@ public class TaskScheduler extends Thread {
             log.info("TaskScheduler thread stopped after {} seconds.", (System.currentTimeMillis() - startTime) / 1000);
             startTime = 0;
         }
+    }
+
+    @Override
+    public TaskScheduler mirror() {
+        TaskScheduler tScheduler = new TaskScheduler(
+                new ArrayList<>(
+                        Mirrors.mirror(tasks).values()
+                ),
+                config.mirror()
+        );
+        tScheduler.recoveryTask = recoveryTask.mirror();
+        tScheduler.retryTask = retryTask.mirror();
+        tScheduler.startTime = startTime;
+        return tScheduler;
     }
 }

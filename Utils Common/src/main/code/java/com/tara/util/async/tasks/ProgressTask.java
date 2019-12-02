@@ -12,6 +12,11 @@ public class ProgressTask extends Task {
     private final AtomicLong progressGoal;
     private AtomicLong progressSteps;
 
+    private ProgressTask(Task superTask, long progressGoal) {
+        super(superTask);
+        this.progressGoal = new AtomicLong(progressGoal);
+    }
+
     public ProgressTask(String taskName, ProgressTaskProcedure taskProcedure, long progressGoal, TaskCriterion criterion) {
         super(taskName, criterion);
         this.progressGoal = new AtomicLong(progressGoal);
@@ -44,5 +49,12 @@ public class ProgressTask extends Task {
         return progress == 0
                 ? 0
                 : ((double) goal()) / progress;
+    }
+
+    @Override
+    public ProgressTask mirror() {
+        ProgressTask pTask = new ProgressTask(super.mirror(), progressGoal.get());
+        pTask.progressSteps = new AtomicLong(progressSteps.get());
+        return pTask;
     }
 }

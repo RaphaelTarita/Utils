@@ -1,8 +1,9 @@
 package com.tara.util.async.tasks.lock;
 
 import com.tara.util.id.TaskID;
+import com.tara.util.mirror.Mirrorable;
 
-public class TaskLock {
+public class TaskLock implements Mirrorable<TaskLock> {
     private final TaskID on;
     private RLock rlock;
     private BLock block;
@@ -78,5 +79,13 @@ public class TaskLock {
                         ? block.toString()
                         : "<BLock inactive>"
         );
+    }
+
+    @Override
+    public TaskLock mirror() {
+        TaskLock lock = new TaskLock(on.mirror());
+        lock.rlock = rlock.mirror();
+        lock.block = block.mirror();
+        return lock;
     }
 }

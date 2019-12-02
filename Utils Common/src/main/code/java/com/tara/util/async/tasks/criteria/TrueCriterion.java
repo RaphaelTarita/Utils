@@ -16,4 +16,9 @@ public class TrueCriterion extends TaskCriterion {
     public void reset() {
         // no action needed
     }
+
+    @Override
+    public TrueCriterion mirror() {
+        return withObservanceState(new TrueCriterion());
+    }
 }

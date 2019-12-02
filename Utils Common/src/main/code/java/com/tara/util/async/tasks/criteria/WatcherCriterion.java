@@ -1,5 +1,7 @@
 package com.tara.util.async.tasks.criteria;
 
+import com.tara.util.mirror.Mirrors;
+
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
@@ -37,5 +39,17 @@ public class WatcherCriterion<W> extends TaskCriterion {
     @Override
     public void reset() {
         // no action needed
+    }
+
+    @Override
+    public WatcherCriterion<W> mirror() {
+        return withObservanceState(
+                new WatcherCriterion<>(
+                        Mirrors.mirror(
+                                watch.get()
+                        ),
+                        watcher
+                )
+        );
     }
 }

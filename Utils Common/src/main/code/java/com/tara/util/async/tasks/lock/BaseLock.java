@@ -1,11 +1,12 @@
 package com.tara.util.async.tasks.lock;
 
+import com.tara.util.mirror.Mirrorable;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
 @Slf4j
-public abstract class BaseLock {
+public abstract class BaseLock implements Mirrorable<BaseLock> {
     private boolean active;
     protected LocalDateTime since;
 

@@ -21,4 +21,11 @@ public class ManualInvokeCriterion extends TaskCriterion {
     public void reset() {
         invoke = false;
     }
+
+    @Override
+    public ManualInvokeCriterion mirror() {
+        ManualInvokeCriterion crit = new ManualInvokeCriterion();
+        crit.invoke = this.invoke;
+        return withObservanceState(crit);
+    }
 }

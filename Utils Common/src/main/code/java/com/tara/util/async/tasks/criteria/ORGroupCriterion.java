@@ -1,5 +1,7 @@
 package com.tara.util.async.tasks.criteria;
 
+import com.tara.util.mirror.Mirrors;
+
 import java.util.List;
 
 public class ORGroupCriterion extends GroupCriterion {
@@ -23,5 +25,14 @@ public class ORGroupCriterion extends GroupCriterion {
             }
         }
         return requireObservance(false);
+    }
+
+    @Override
+    public ORGroupCriterion mirror() {
+        return withObservanceState(
+                new ORGroupCriterion(
+                        Mirrors.mirror(criteria)
+                )
+        );
     }
 }

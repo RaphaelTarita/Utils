@@ -16,4 +16,9 @@ public class FalseCriterion extends TaskCriterion {
     public void reset() {
         // no action needed
     }
+
+    @Override
+    public TaskCriterion mirror() {
+        return withObservanceState(new FalseCriterion());
+    }
 }

@@ -1,5 +1,7 @@
 package com.tara.util.async.tasks.criteria;
 
+import com.tara.util.mirror.Mirrors;
+
 import java.util.List;
 
 public class ANDGroupCriterion extends GroupCriterion {
@@ -23,5 +25,16 @@ public class ANDGroupCriterion extends GroupCriterion {
             }
         }
         return requireObservance(true);
+    }
+
+    @Override
+    public ANDGroupCriterion mirror() {
+        return withObservanceState(
+                new ANDGroupCriterion(
+                        Mirrors.mirror(
+                                criteria
+                        )
+                )
+        );
     }
 }

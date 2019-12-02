@@ -11,13 +11,14 @@ import com.tara.util.async.tasks.procedure.ProcedureException;
 import com.tara.util.async.tasks.procedure.TaskProcedure;
 import com.tara.util.async.tasks.procedure.TaskProcedureException;
 import com.tara.util.id.TaskID;
+import com.tara.util.mirror.Mirrorable;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Slf4j
-public class Task extends Thread {
-    private Long iterations;
+public class Task extends Thread implements Mirrorable<Task> {
+    private long iterations;
     private final TaskID id;
     private TaskLock lock;
     private boolean retry;
@@ -26,6 +27,24 @@ public class Task extends Thread {
 
     private void resetAll() {
         criterion.reset();
+    }
+
+    protected Task(Task other) {
+        iterations = other.iterations;
+        id = other.id;
+        lock = other.lock;
+        retry = other.retry;
+        taskProcedure = other.taskProcedure;
+        criterion = other.criterion;
+    }
+
+    private Task(TaskID taskID, TaskProcedure procedure, TaskCriterion criterion) {
+        id = taskID;
+        taskProcedure = procedure;
+        this.criterion = criterion;
+        iterations = 0;
+        lock = null;
+        retry = false;
     }
 
     protected Task(String taskName, TaskCriterion criterion) {
@@ -43,7 +62,7 @@ public class Task extends Thread {
         retry = false;
         this.taskProcedure = taskProcedure;
         this.criterion = criterion;
-        iterations = 0L;
+        iterations = 0;
     }
 
     public Task(String taskName, TaskProcedure taskProcedure, List<TaskCriterion> criteria) {
@@ -177,5 +196,14 @@ public class Task extends Thread {
     @Override
     public String toString() {
         return id.name() + '#' + iterations + " (id: " + id.index() + ')';
+    }
+
+    @Override
+    public Task mirror() {
+        Task task = new Task(id.mirror(), taskProcedure, criterion.mirror());
+        task.iterations = iterations;
+        task.lock = lock.mirror();
+        task.retry = retry;
+        return task;
     }
 }

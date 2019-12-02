@@ -1,7 +1,14 @@
 package com.tara.util.async.tasks.criteria;
 
-public abstract class TaskCriterion {
+import com.tara.util.mirror.Mirrorable;
+
+public abstract class TaskCriterion implements Mirrorable<TaskCriterion> {
     protected boolean observed;
+
+    protected <C extends TaskCriterion> C withObservanceState(C criterion) {
+        criterion.observed = this.observed;
+        return criterion;
+    }
 
     protected boolean requireObservance(boolean given) {
         return observed && given;
