@@ -19,7 +19,7 @@ jobs:
       - name: Maven Deploy
         env:
           GITHUB_USERNAME: RaphaelTarita
-          GITHUB_TOKEN: RaphaelTarita
+          GITHUB_TOKEN: 5f8ecd55fdf69666035d189851f353e741a5436e
         run: mvn --settings settings.xml -B -e -Dmaven.wagon.http.pool=false clean deploy
 
 
