@@ -1,6 +1,5 @@
 package com.tara.util.async.tasks;
 
-import com.tara.util.annotation.Static;
 import com.tara.util.async.tasks.criteria.ANDGroupCriterion;
 import com.tara.util.async.tasks.criteria.GroupCriterion;
 import com.tara.util.async.tasks.criteria.ManualInvokeCriterion;
@@ -118,7 +117,6 @@ public class Task extends Thread implements Mirrorable<Task> {
         }
     }
 
-    @Static
     public void execute() {
         if (ready()) {
             if (!locked()) {
