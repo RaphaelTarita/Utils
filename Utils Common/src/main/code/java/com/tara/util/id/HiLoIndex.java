@@ -1,9 +1,11 @@
 package com.tara.util.id;
 
+import com.tara.util.mirror.Mirrorable;
+
 import java.io.Serializable;
 import java.util.Objects;
 
-public class HiLoIndex implements Serializable {
+public class HiLoIndex implements Serializable, Mirrorable<HiLoIndex> {
     private static final long serialVersionUID = 62459995810455813L;
 
     private enum HiLo {
@@ -69,5 +71,10 @@ public class HiLoIndex implements Serializable {
     @Override
     public String toString() {
         return String.valueOf(index);
+    }
+
+    @Override
+    public HiLoIndex mirror() {
+        return new HiLoIndex(index);
     }
 }

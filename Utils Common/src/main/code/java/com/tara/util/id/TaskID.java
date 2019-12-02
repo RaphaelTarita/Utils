@@ -54,6 +54,6 @@ public class TaskID implements Serializable, Mirrorable<TaskID> {
 
     @Override
     public TaskID mirror() {
-        return new TaskID(taskName, index);
+        return new TaskID(taskName, index.mirror());
     }
 }
