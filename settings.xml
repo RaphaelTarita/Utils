@@ -23,6 +23,12 @@
                     <id>github</id>
                     <name>GitHub RaphaelTarita Apache Maven Packages</name>
                     <url>https://maven.pkg.github.com/RaphaelTarita</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
                 </repository>
             </repositories>
         </profile>
