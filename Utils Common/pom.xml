@@ -11,6 +11,10 @@
 
     <artifactId>utils-common</artifactId>
 
+    <properties>
+        <logback.version>1.2.3</logback.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
