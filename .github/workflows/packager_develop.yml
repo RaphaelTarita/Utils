@@ -19,7 +19,7 @@ jobs:
       - name: Maven Deploy
         env:
           GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: 0c4d4b8f90308f945ca9d415e2aa8220ca8adc54
         run: mvn --settings settings.xml -B -e -Dmaven.wagon.http.pool=false clean deploy
 
 
