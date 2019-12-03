@@ -5,6 +5,10 @@ on:
     branches:
       - develop
 
+env:
+  GITHUB_USERNAME: x-access-token
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,9 +33,6 @@ jobs:
         with:
           java-version: 11
       - name: Maven Deploy
-        env:
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --settings settings.xml -B -e -Dmaven.wagon.http.pool=false clean deploy
 
 
