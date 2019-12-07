@@ -54,10 +54,12 @@ public class HiLoIndex implements UID, Mirrorable<HiLoIndex> {
 
     public HiLoIndex() {
         index = getNew();
+        registerUID();
     }
 
     public HiLoIndex(long index) {
         this.index = index;
+        registerUID();
     }
 
     public long toLong() {
