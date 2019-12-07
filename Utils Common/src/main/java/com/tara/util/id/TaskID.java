@@ -1,35 +1,41 @@
 package com.tara.util.id;
 
-import java.util.Objects;
-import java.util.function.Function;
+import com.tara.util.mirror.Mirrorable;
 
-public class TaskID implements UID {
+import java.util.Objects;
+
+public class TaskID implements UID, Mirrorable<TaskID> {
     private static final long serialVersionUID = -71980682148021938L;
 
 
     private String taskName;
     private HiLoIndex index;
 
+    static {
+        UID.registerBuilder(TaskID.class, TaskID::mapString);
+    }
+
+    public static TaskID mapString(String str) {
+        String[] args = str.split("\\s");
+        String name = args[0].replace("_", " ");
+        return new TaskID(name, HiLoIndex.mapString(args[1]));
+    }
+
     private TaskID(String name, HiLoIndex index) {
         this.index = index;
         this.taskName = name;
-        register();
+        registerUID();
     }
 
     public TaskID(String name) {
         index = new HiLoIndex();
         taskName = name;
-        register();
+        registerUID();
     }
 
     @Override
-    public Function<String, UID> stringConverter() {
-        return s -> {
-            String[] args = s.split("\\s");
-            String index = args[1].replace(" (id:", "")
-                .replace(")", "");
-            return new TaskID(args[0], new HiLoIndex(index));
-        };
+    public String mapUID() {
+        return taskName.replace(" ", "_") + " " + index.mapUID();
     }
 
     public String name() {
@@ -61,5 +67,10 @@ public class TaskID implements UID {
     @Override
     public String toString() {
         return taskName + " (id: " + index + ')';
+    }
+
+    @Override
+    public TaskID mirror() {
+        return new TaskID(taskName, index.mirror());
     }
 }

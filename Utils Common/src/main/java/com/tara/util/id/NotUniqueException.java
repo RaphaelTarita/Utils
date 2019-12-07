@@ -9,6 +9,6 @@ public class NotUniqueException extends RuntimeException {
 
     @Override
     public String toString() {
-        return notUnique.toString() + " is not unique according to the instance registry";
+        return super.toString() + ": " + notUnique.toString() + " (" + notUnique.mapUID() + ") is not unique according to the instance registry";
     }
 }

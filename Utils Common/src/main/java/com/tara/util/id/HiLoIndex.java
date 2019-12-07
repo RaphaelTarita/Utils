@@ -1,9 +1,10 @@
 package com.tara.util.id;
 
-import java.util.Objects;
-import java.util.function.Function;
+import com.tara.util.mirror.Mirrorable;
 
-public class HiLoIndex implements UID {
+import java.util.Objects;
+
+public class HiLoIndex implements UID, Mirrorable<HiLoIndex> {
     private static final long serialVersionUID = 62459995810455813L;
 
     private enum HiLo {
@@ -43,6 +44,14 @@ public class HiLoIndex implements UID {
 
     private final long index;
 
+    static {
+        UID.registerBuilder(HiLoIndex.class, HiLoIndex::mapString);
+    }
+
+    public static HiLoIndex mapString(String strIndex) {
+        return new HiLoIndex(Long.parseLong(strIndex));
+    }
+
     public HiLoIndex() {
         index = getNew();
     }
@@ -51,17 +60,13 @@ public class HiLoIndex implements UID {
         this.index = index;
     }
 
-    public HiLoIndex(String strIndex) {
-        this(Long.parseLong(strIndex));
-    }
-
     public long toLong() {
         return index;
     }
 
     @Override
-    public Function<String, UID> stringConverter() {
-        return HiLoIndex::new;
+    public String mapUID() {
+        return String.valueOf(index);
     }
 
     @Override
@@ -78,5 +83,10 @@ public class HiLoIndex implements UID {
     @Override
     public String toString() {
         return String.valueOf(index);
+    }
+
+    @Override
+    public HiLoIndex mirror() {
+        return new HiLoIndex(index);
     }
 }

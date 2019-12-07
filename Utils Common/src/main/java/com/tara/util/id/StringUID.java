@@ -1,11 +1,11 @@
 package com.tara.util.id;
 
+import com.tara.util.mirror.Mirrorable;
 import com.tara.util.tools.CharRandom;
 
 import java.util.Objects;
-import java.util.function.Function;
 
-public class StringUID implements UID {
+public class StringUID implements UID, Mirrorable<StringUID> {
     private static final long serialVersionUID = 9114740774376532987L;
     private static final int MAX_RANDOM_ID_LENGTH = 50;
 
@@ -13,9 +13,13 @@ public class StringUID implements UID {
 
     private String string;
 
+    static {
+        UID.registerBuilder(StringUID.class, StringUID::new);
+    }
+
     public StringUID(String str) {
         string = str;
-        register();
+        registerUID();
     }
 
     public StringUID() {
@@ -23,12 +27,12 @@ public class StringUID implements UID {
         while (!check()) {
             string = random.randomLengthString(MAX_RANDOM_ID_LENGTH);
         }
-        register();
+        registerUID();
     }
 
     @Override
-    public Function<String, UID> stringConverter() {
-        return StringUID::new;
+    public String mapUID() {
+        return string;
     }
 
     @Override
@@ -48,6 +52,11 @@ public class StringUID implements UID {
 
     @Override
     public String toString() {
-        return string;
+        return "StringUID{ " + string + '}';
+    }
+
+    @Override
+    public StringUID mirror() {
+        return new StringUID(string);
     }
 }
