@@ -2,23 +2,40 @@ package com.tara.util.id;
 
 import com.tara.util.mirror.Mirrorable;
 
-import java.io.Serializable;
 import java.util.Objects;
 
-public class TaskID implements Serializable, Mirrorable<TaskID> {
+public class TaskID implements UID, Mirrorable<TaskID> {
     private static final long serialVersionUID = -71980682148021938L;
+
 
     private String taskName;
     private HiLoIndex index;
 
+    static {
+        UID.registerBuilder(TaskID.class, TaskID::mapString);
+    }
+
+    public static TaskID mapString(String str) {
+        String[] args = str.split("\\s");
+        String name = args[0].replace("_", " ");
+        return new TaskID(name, HiLoIndex.mapString(args[1]));
+    }
+
     private TaskID(String name, HiLoIndex index) {
-        taskName = name;
         this.index = index;
+        this.taskName = name;
+        registerUID();
     }
 
     public TaskID(String name) {
-        taskName = name;
         index = new HiLoIndex();
+        taskName = name;
+        registerUID();
+    }
+
+    @Override
+    public String mapUID() {
+        return taskName.replace(" ", "_") + " " + index.mapUID();
     }
 
     public String name() {
@@ -36,7 +53,7 @@ public class TaskID implements Serializable, Mirrorable<TaskID> {
         } else if (obj instanceof TaskID) {
             TaskID tidObj = (TaskID) obj;
             return tidObj.taskName.equals(taskName)
-                    && tidObj.index.equals(index);
+                && tidObj.index.equals(index);
         } else {
             return false;
         }
