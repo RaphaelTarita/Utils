@@ -1,28 +1,35 @@
 package com.tara.util.id;
 
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.function.Function;
 
-public class TaskID implements UID<String> {
+public class TaskID implements UID {
     private static final long serialVersionUID = -71980682148021938L;
 
-    private static HashSet<String> names = new HashSet<>();
 
     private String taskName;
     private HiLoIndex index;
 
-    private void register(String name) {
-        if (!taken(name)) {
-            taskName = name;
-            names.add(name);
-        } else {
-            throw new IllegalArgumentException("Name " + name + " or index " + index.toString() + " was already used");
-        }
+    private TaskID(String name, HiLoIndex index) {
+        this.index = index;
+        this.taskName = name;
+        register();
     }
 
     public TaskID(String name) {
         index = new HiLoIndex();
-        register(name);
+        taskName = name;
+        register();
+    }
+
+    @Override
+    public Function<String, UID> stringConverter() {
+        return s -> {
+            String[] args = s.split("\\s");
+            String index = args[1].replace(" (id:", "")
+                .replace(")", "");
+            return new TaskID(args[0], new HiLoIndex(index));
+        };
     }
 
     public String name() {
@@ -34,28 +41,13 @@ public class TaskID implements UID<String> {
     }
 
     @Override
-    public boolean taken(String idGenerator) {
-        return names.contains(idGenerator) && index.taken(index.toLong());
-    }
-
-    @Override
-    public UID<String> newUnique(String generator) {
-        return new TaskID(generator);
-    }
-
-    @Override
-    public String getGenerator() {
-        return taskName;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         } else if (obj instanceof TaskID) {
             TaskID tidObj = (TaskID) obj;
             return tidObj.taskName.equals(taskName)
-                    && tidObj.index.equals(index);
+                && tidObj.index.equals(index);
         } else {
             return false;
         }

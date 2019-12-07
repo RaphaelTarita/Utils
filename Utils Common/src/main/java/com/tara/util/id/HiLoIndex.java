@@ -1,8 +1,9 @@
 package com.tara.util.id;
 
 import java.util.Objects;
+import java.util.function.Function;
 
-public class HiLoIndex implements UID<Long> {
+public class HiLoIndex implements UID {
     private static final long serialVersionUID = 62459995810455813L;
 
     private enum HiLo {
@@ -16,9 +17,9 @@ public class HiLoIndex implements UID<Long> {
 
     private static void stateSwitch() {
         state = (
-                state == HiLo.LO
-                        ? HiLo.HI
-                        : HiLo.LO
+            state == HiLo.LO
+                ? HiLo.HI
+                : HiLo.LO
         );
     }
 
@@ -50,33 +51,23 @@ public class HiLoIndex implements UID<Long> {
         this.index = index;
     }
 
+    public HiLoIndex(String strIndex) {
+        this(Long.parseLong(strIndex));
+    }
+
     public long toLong() {
         return index;
     }
 
     @Override
-    public boolean taken(Long idGenerator) {
-        return idGenerator > loIndex && idGenerator < hiIndex;
-    }
-
-    @Override
-    public UID<Long> newUnique(Long generator) {
-        if (taken(generator)) {
-            return new HiLoIndex();
-        } else {
-            return new HiLoIndex(generator);
-        }
-    }
-
-    @Override
-    public Long getGenerator() {
-        return index;
+    public Function<String, UID> stringConverter() {
+        return HiLoIndex::new;
     }
 
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof HiLoIndex)
-                && (this.index == ((HiLoIndex) obj).index);
+            && (this.index == ((HiLoIndex) obj).index);
     }
 
     @Override
