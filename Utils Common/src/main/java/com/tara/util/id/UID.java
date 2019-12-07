@@ -8,6 +8,14 @@ import java.util.Set;
 import java.util.function.Function;
 
 public interface UID extends Serializable {
+    private static void load(Class<?> clazz) {
+        try {
+            Class.forName(clazz.getName());
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException("Class not found: " + clazz.getName(), ex);
+        }
+    }
+
     Set<UID> instanceRegistry = new HashSet<>();
     Map<Class<? extends UID>, Function<String, ? extends UID>> builderRegistry = new HashMap<>();
 
@@ -36,6 +44,9 @@ public interface UID extends Serializable {
     }
 
     static Function<String, ? extends UID> getUIDMapper(Class<? extends UID> clazz) {
+        if (!builderRegistry.containsKey(clazz)) {
+            load(clazz);
+        }
         return builderRegistry.get(clazz);
     }
 

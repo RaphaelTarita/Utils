@@ -52,7 +52,7 @@ public class StringUID implements UID, Mirrorable<StringUID> {
 
     @Override
     public String toString() {
-        return "StringUID{ " + string + '}';
+        return "StringUID{ " + string + " }";
     }
 
     @Override
