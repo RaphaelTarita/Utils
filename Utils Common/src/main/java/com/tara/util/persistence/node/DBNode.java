@@ -1,10 +1,9 @@
 package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
-import com.tara.util.persistence.Persistable;
 import com.tara.util.persistence.node.config.NodeConfig;
 
-public class DBNode<VO extends Persistable> extends AbstractNode<VO> {
+public class DBNode<VO> extends AbstractNode<VO> {
     protected DBNode(UID nodeID, Priority defaultP) {
         super(nodeID, defaultP);
     }

@@ -1,11 +1,10 @@
 package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
-import com.tara.util.persistence.Persistable;
 import com.tara.util.persistence.node.state.NodeState;
 import com.tara.util.persistence.node.state.NodeStateEnum;
 
-public abstract class AbstractNode<VO extends Persistable> implements ResourceNode<VO> {
+public abstract class AbstractNode<VO> implements ResourceNode<VO> {
     protected final UID nodeID;
     private Priority defaultP;
     protected VO liveVO;

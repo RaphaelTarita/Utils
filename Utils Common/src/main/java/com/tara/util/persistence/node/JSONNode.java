@@ -1,11 +1,10 @@
 package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
-import com.tara.util.persistence.Persistable;
 import com.tara.util.persistence.node.config.JSONConfig;
 import com.tara.util.persistence.node.config.NodeConfig;
 
-public class JSONNode<VO extends Persistable> extends AbstractNode<VO> {
+public class JSONNode<VO> extends AbstractNode<VO> {
     private JSONConfig config;
 
     public JSONNode(UID nodeID, Priority defaultP) {

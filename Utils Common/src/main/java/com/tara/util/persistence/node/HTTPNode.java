@@ -1,10 +1,9 @@
 package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
-import com.tara.util.persistence.Persistable;
 import com.tara.util.persistence.node.config.NodeConfig;
 
-public class HTTPNode<VO extends Persistable> extends AbstractNode<VO> {
+public class HTTPNode<VO> extends AbstractNode<VO> {
     protected HTTPNode(UID nodeID, Priority defaultP) {
         super(nodeID, defaultP);
     }

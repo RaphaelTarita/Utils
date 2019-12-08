@@ -1,10 +1,9 @@
 package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
-import com.tara.util.persistence.Persistable;
 import com.tara.util.persistence.node.config.NodeConfig;
 
-public interface ResourceNode<VO extends Persistable> {
+public interface ResourceNode<VO> {
     enum Priority {
         REMOTE,
         LOCAL
