@@ -1,4 +1,4 @@
-package com.tara.util.annotation.persistence;
+package com.tara.util.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

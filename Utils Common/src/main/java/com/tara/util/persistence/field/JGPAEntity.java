@@ -1,8 +1,8 @@
 package com.tara.util.persistence.field;
 
-import com.tara.util.annotation.persistence.FieldGET;
-import com.tara.util.annotation.persistence.FieldSET;
-import com.tara.util.annotation.persistence.Persistable;
+import com.tara.util.annotation.FieldGET;
+import com.tara.util.annotation.FieldSET;
+import com.tara.util.annotation.Persistable;
 import com.tara.util.container.tuple.Twin;
 
 import java.lang.reflect.Method;

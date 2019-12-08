@@ -1,6 +1,6 @@
 package com.tara.util.persistence.field;
 
-import com.tara.util.annotation.persistence.Persistable;
+import com.tara.util.annotation.Persistable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
