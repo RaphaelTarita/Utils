@@ -2,6 +2,7 @@ package com.tara.util.id;
 
 import com.tara.util.mirror.Mirrorable;
 import com.tara.util.tools.CharRandom;
+import com.tara.util.tools.Charsets;
 
 import java.util.Objects;
 
@@ -9,7 +10,7 @@ public class StringUID implements UID, Mirrorable<StringUID> {
     private static final long serialVersionUID = 9114740774376532987L;
     private static final int MAX_RANDOM_ID_LENGTH = 50;
 
-    private static final CharRandom random = new CharRandom();
+    private static final CharRandom random = new CharRandom(Charsets.ALPHANUM);
 
     private String string;
 
@@ -42,7 +43,7 @@ public class StringUID implements UID, Mirrorable<StringUID> {
         }
 
         return (obj instanceof StringUID)
-            && ((StringUID) obj).string.equals(string);
+                && ((StringUID) obj).string.equals(string);
     }
 
     @Override
