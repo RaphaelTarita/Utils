@@ -5,6 +5,7 @@ import com.tara.util.annotation.FieldSET;
 import com.tara.util.annotation.Persistable;
 import com.tara.util.container.tuple.Twin;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,20 +116,31 @@ public class JGPAEntity<VO> {
         bind(entity);
     }
 
-    public VO bind(VO entity) {
+    public void bind(VO entity) {
         if (target.isInstance(entity)) {
             VO temp = this.entity;
             this.entity = entity;
-            return temp;
         } else {
             throw new IllegalArgumentException("entity binding type mismatch, required: " + target.getName() + ", found: " + entity.getClass().getName());
         }
     }
 
-    public VO detach() {
+    @SuppressWarnings("unchecked")
+    public VO getEmpty() {
+        try {
+            return (VO) target.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class " + target.toString() + " (" + name + ") has no default constructor");
+        }
+    }
+
+    public void bindEmpty() {
+        bind(getEmpty());
+    }
+
+    public void detach() {
         VO temp = entity;
         entity = null;
-        return temp;
     }
 
     public boolean bound() {
@@ -137,6 +149,10 @@ public class JGPAEntity<VO> {
 
     public boolean detached() {
         return entity == null;
+    }
+
+    public boolean hasField(String field) {
+        return fields.containsKey(field);
     }
 
     public Object get(String field) {
@@ -186,5 +202,31 @@ public class JGPAEntity<VO> {
         if (detached()) {
             throw new IllegalStateException("JGPA Entity is not bound");
         }
+    }
+
+    public List<JGPAField<VO>> getFields() {
+        return new ArrayList<>(fields.values());
+    }
+
+    public Map<String, Object> getValueMap() {
+        requireBound();
+        Map<String, Object> values = new HashMap<>(fields.size());
+        for (Map.Entry<String, JGPAField<VO>> entry : fields.entrySet()) {
+            String k = entry.getKey();
+            JGPAField<VO> v = entry.getValue();
+            if (entry.getValue().isComposite()) {
+                values.put(k, v.getBoundComposite(entity).getValueMap());
+            } else {
+                values.put(k, v.get(entity));
+            }
+        }
+        return values;
+    }
+
+    public VO getVO() {
+        if (detached()) {
+            return getEmpty();
+        }
+        return entity;
     }
 }

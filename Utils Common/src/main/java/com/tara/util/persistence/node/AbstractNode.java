@@ -1,6 +1,7 @@
 package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
+import com.tara.util.persistence.field.JGPAEntity;
 import com.tara.util.persistence.node.state.NodeState;
 import com.tara.util.persistence.node.state.NodeStateEnum;
 
@@ -10,22 +11,24 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
     protected VO liveVO;
     protected VO unresolvedRemote;
     protected VO unresolvedLocal;
+    protected JGPAEntity<VO> gateway;
     protected NodeState state;
 
-    protected AbstractNode(UID nodeID, Priority defaultP) {
+    protected AbstractNode(UID nodeID, Class<? extends VO> voClass, Priority defaultP) {
         this.nodeID = nodeID;
         this.defaultP = defaultP;
         liveVO = null;
         unresolvedRemote = null;
         unresolvedLocal = null;
+        gateway = new JGPAEntity<>(voClass);
         state = new NodeState(nodeID);
     }
 
-    protected AbstractNode(UID nodeID) {
-        this(nodeID, null);
+    protected AbstractNode(UID nodeID, Class<? extends VO> voClass) {
+        this(nodeID, voClass, null);
     }
 
-    private void sync() {
+    protected void sync() {
         switch (state.getEnumeratedState()) {
             case REMOTE:
                 unresolvedLocal = null;
@@ -73,6 +76,18 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
         sync();
     }
 
+    protected void requireNonConflicted() {
+        if (conflicted()) {
+            throw new IllegalStateException("Resource Node is conflicted, history:\n" + state.getHistory());
+        }
+    }
+
+    protected void requireSync() {
+        if (state.getEnumeratedState() != NodeStateEnum.SYNC) {
+            throw new IllegalStateException("Resource Node is not in sync, history:\n" + state.getHistory());
+        }
+    }
+
     @Override
     public boolean conflicted() {
         return state.getEnumeratedState() == NodeStateEnum.CONFLICT;
@@ -92,7 +107,6 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
                 resolve(defaultP);
             }
         } else {
-            liveVO = unresolvedLocal;
             state.update(NodeStateEnum.LOCAL, "commit successful");
             sync();
         }
@@ -100,9 +114,7 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
 
     @Override
     public VO checkout() {
-        if (conflicted()) {
-            throw new IllegalStateException("Resource Node is conflicted, history:\n" + state.getHistory());
-        }
+        requireSync();
         return liveVO;
     }
 }

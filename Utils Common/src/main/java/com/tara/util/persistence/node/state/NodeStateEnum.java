@@ -6,7 +6,8 @@ public enum NodeStateEnum {
     SYNC("sync"),
     LOCAL("local"),
     REMOTE("remote"),
-    CONFLICT("conflict");
+    CONFLICT("conflict"),
+    PROBLEM("problem");
 
     private static int maxchars() {
         int max = 0;
@@ -27,10 +28,7 @@ public enum NodeStateEnum {
 
     public String padded() {
         int padding = MAXCHARS - str.length() + 1;
-        StringBuilder res = new StringBuilder(str);
-        res.append(" ".repeat(Math.max(0, padding)));
-
-        return res.toString();
+        return str + " ".repeat(Math.max(0, padding));
     }
 
     public String str() {

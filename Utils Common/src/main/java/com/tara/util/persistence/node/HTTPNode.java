@@ -4,12 +4,12 @@ import com.tara.util.id.UID;
 import com.tara.util.persistence.node.config.NodeConfig;
 
 public class HTTPNode<VO> extends AbstractNode<VO> {
-    protected HTTPNode(UID nodeID, Priority defaultP) {
-        super(nodeID, defaultP);
+    protected HTTPNode(UID nodeID, Class<? extends VO> voClass, Priority defaultP) {
+        super(nodeID, voClass, defaultP);
     }
 
-    protected HTTPNode(UID nodeID) {
-        super(nodeID);
+    protected HTTPNode(UID nodeID, Class<? extends VO> voClass) {
+        super(nodeID, voClass);
     }
 
     @Override

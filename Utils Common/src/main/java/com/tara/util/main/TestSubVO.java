@@ -33,4 +33,12 @@ public class TestSubVO {
     public void setTest2(String test2) {
         this.test2 = test2;
     }
+
+    @Override
+    public String toString() {
+        return "TestSubVO{" +
+                "test1='" + test1 + '\'' +
+                ", test2='" + test2 + '\'' +
+                '}';
+    }
 }

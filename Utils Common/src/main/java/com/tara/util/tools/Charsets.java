@@ -9,15 +9,17 @@ public enum Charsets {
     ALPHA_UPPER("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
     NUMERICAL("0123456789"),
     OPERATORS("+-*/="),
-    SPACES(" \n\t"),
-    PUNCTUATIONS(".?!-"),
+    SPACES(" \n\r\t"),
+    PUNCTUATIONS(",.:?!-"),
 
-    EXTRAS(OPERATORS.charsetString + PUNCTUATIONS.charsetString + "#@~_'"),
+    EXTRAS(OPERATORS.charsetString + PUNCTUATIONS.charsetString + "#@~_'\""),
     MATHEMATICAL(NUMERICAL.charsetString + OPERATORS.charsetString),
     ALPHA(ALPHA_LOWER.charsetString + ALPHA_UPPER.charsetString),
     ALPHANUM(ALPHA.charsetString + NUMERICAL.charsetString),
     TEXTUAL(ALPHANUM.charsetString + SPACES.charsetString + PUNCTUATIONS.charsetString),
-    DEFAULT(ALPHANUM.charsetString + EXTRAS.charsetString);
+    DEFAULT(ALPHANUM.charsetString + EXTRAS.charsetString),
+
+    JSON_UNQUOT(ALPHANUM.charsetString + "_#@{}[],\":");
 
     private final String charsetString;
     private final Set<Character> charset;
@@ -54,6 +56,19 @@ public enum Charsets {
             res.append(predefined.charsetString);
         }
         return toSet(res.toString());
+    }
+
+    public boolean conforms(char c) {
+        return charset.contains(c);
+    }
+
+    public boolean conforms(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (!conforms(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

@@ -4,12 +4,12 @@ import com.tara.util.id.UID;
 import com.tara.util.persistence.node.config.NodeConfig;
 
 public class DBNode<VO> extends AbstractNode<VO> {
-    protected DBNode(UID nodeID, Priority defaultP) {
-        super(nodeID, defaultP);
+    protected DBNode(UID nodeID, Class<? extends VO> voClass, Priority defaultP) {
+        super(nodeID, voClass, defaultP);
     }
 
-    protected DBNode(UID nodeID) {
-        super(nodeID);
+    protected DBNode(UID nodeID, Class<? extends VO> voClass) {
+        super(nodeID, voClass);
     }
 
     @Override

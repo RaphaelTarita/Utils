@@ -3,6 +3,7 @@ package com.tara.util.persistence.node.config;
 import com.tara.util.mirror.Mirrorable;
 import com.tara.util.mirror.Mirrors;
 
+import java.io.File;
 import java.nio.file.Path;
 
 public class JSONConfig implements NodeConfig {
@@ -39,10 +40,12 @@ public class JSONConfig implements NodeConfig {
         }
 
         public Builder withFileExt(String fileExt) {
-            builderFileExt = fileExt.charAt(0) == '.'
-                    ? ""
-                    : '.'
-                            + fileExt;
+            builderFileExt = (
+                    fileExt.charAt(0) == '.'
+                            ? ""
+                            : '.'
+            )
+                    + fileExt;
             return this;
         }
 
@@ -64,6 +67,10 @@ public class JSONConfig implements NodeConfig {
 
     public String fileExt() {
         return fileExt;
+    }
+
+    public File getFile(String filename) {
+        return nodePath.resolve(filename + fileExt).toFile();
     }
 
     public Builder thisBuilder() {
