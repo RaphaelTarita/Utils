@@ -169,11 +169,7 @@ public class JSONPort {
             final Class<?> finalExpected = expectedClass;
             producer = v -> {
                 JGPAEntity<Object> newGateway = new JGPAEntity<>(finalExpected);
-                try {
-                    newGateway.bind(finalExpected.getDeclaredConstructor().newInstance());
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-                    throw new FormatException("Could not build @Persistable " + finalExpected.toString() + " (" + newGateway.name() + "). Missing default constructor");
-                }
+                newGateway.bindEmpty();
                 return fromJSON0(newGateway, v);
             };
         } else if (expectedClass != null && expectedClass.isArray()) {
