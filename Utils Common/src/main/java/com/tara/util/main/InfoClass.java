@@ -22,7 +22,7 @@ public class InfoClass {
                         + "\nThere is no other purpose of this Class."
         );
 
-        JSONConfig config = JSONConfig.builder().withNodePath("D:\\Dokumente\\Development\\Utils\\Utils Common\\src\\main\\resources").build();
+        JSONConfig config = JSONConfig.builder().withNodePath("D:\\dev\\Utils\\Utils Common\\src\\main\\resources").build();
         JSONNode<TestVO> node = new JSONNode<>(new StringUID("Test"), TestVO.class, config);
         TestVO vo1 = new TestVO("Hello World!", List.of(1, 1, 2, 3, 5, 8, 13, 21), 123, new TestSubVO());
         log.info(vo1.toString());

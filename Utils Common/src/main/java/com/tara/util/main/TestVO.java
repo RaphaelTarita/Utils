@@ -1,7 +1,6 @@
 package com.tara.util.main;
 
-import com.tara.util.annotation.FieldGET;
-import com.tara.util.annotation.FieldSET;
+import com.tara.util.annotation.Field;
 import com.tara.util.annotation.Persistable;
 
 import java.util.ArrayList;
@@ -9,9 +8,16 @@ import java.util.List;
 
 @Persistable("TEST_VO")
 public class TestVO {
+    @Field("TEST_1")
     private String test1;
+
+    @Field("TEST_2")
     private List<Integer> test2;
+
+    @Field("TEST_3")
     private Integer test3;
+
+    @Field("SUB_VO")
     private TestSubVO subVO;
 
     public TestVO() {
@@ -25,46 +31,6 @@ public class TestVO {
         this.test1 = test1;
         this.test2 = test2;
         this.test3 = test3;
-        this.subVO = subVO;
-    }
-
-    @FieldGET("TEST_1")
-    public String getTest1() {
-        return test1;
-    }
-
-    @FieldSET("TEST_1")
-    public void setTest1(String test1) {
-        this.test1 = test1;
-    }
-
-    @FieldGET("TEST_2")
-    public List<Integer> getTest2() {
-        return test2;
-    }
-
-    @FieldSET("TEST_2")
-    public void setTest2(List<Integer> test2) {
-        this.test2 = test2;
-    }
-
-    @FieldGET("TEST_3")
-    public Integer getTest3() {
-        return test3 * 2;
-    }
-
-    @FieldSET("TEST_3")
-    public void setTest3(Integer test3) {
-        this.test3 = test3 / 2;
-    }
-
-    @FieldGET("SUB_VO")
-    public TestSubVO getSubVO() {
-        return subVO;
-    }
-
-    @FieldSET("SUB_VO")
-    public void setSubVO(TestSubVO subVO) {
         this.subVO = subVO;
     }
 

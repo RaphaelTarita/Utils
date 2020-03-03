@@ -5,13 +5,10 @@ import com.tara.util.annotation.FieldSET;
 import com.tara.util.annotation.Persistable;
 import com.tara.util.container.tuple.Twin;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JGPAEntity<VO> {
     private static final String MULTI_GET = "multiple get accessors on one field";
@@ -21,6 +18,7 @@ public class JGPAEntity<VO> {
     private static final String WRONG_GETSIG = "wrong get accessor signature";
     private static final String WRONG_SETSIG = "wrong set accessor signature";
     private static final String TYPE_MISMATCH = "get and set accessors do not match";
+    private static final String ACCESSOR_NATIVE_INTERSECTION = "found intersection between accessor fields and native fields";
 
     private String name;
     private Class<?> target;
@@ -53,7 +51,23 @@ public class JGPAEntity<VO> {
         }
     }
 
-    private void checkAccessorMap(Map<String, Twin<Method>> accessors) {
+    private void resolve(Field f, Map<String, Field> natives) {
+        if (f.isAnnotationPresent(com.tara.util.annotation.Field.class)) {
+            natives.put(f.getAnnotation(com.tara.util.annotation.Field.class).value(), f);
+        }
+    }
+
+    private void checkMaps(Map<String, Twin<Method>> accessors, Map<String, Field> natives) {
+        Set<String> duplicates = new HashSet<>(natives.keySet());
+        duplicates.retainAll(accessors.keySet());
+        if (duplicates.size() > 0) {
+            throw new FieldMappingException(duplicates.iterator().next(), name, ACCESSOR_NATIVE_INTERSECTION +
+                    (duplicates.size() > 1
+                            ? " (+ " + (duplicates.size() - 1) + " more related issues"
+                            : "")
+            );
+        }
+
         for (Map.Entry<String, Twin<Method>> accessorTwin : accessors.entrySet()) {
             Method getter = accessorTwin.getValue().first();
             Method setter = accessorTwin.getValue().second();
@@ -77,16 +91,27 @@ public class JGPAEntity<VO> {
         }
     }
 
-    private void fieldInit(Map<String, Twin<Method>> accessors) {
-        fields = new HashMap<>(accessors.entrySet().size());
+    private void fieldInit(Map<String, Twin<Method>> accessors, Map<String, Field> natives) {
+        fields = new HashMap<>(accessors.entrySet().size() + natives.entrySet().size());
         for (Map.Entry<String, Twin<Method>> accessorTwin : accessors.entrySet()) {
             fields.put(
                     accessorTwin.getKey(),
-                    new JGPAField<>(
+                    new AccessorField<>(
                             name,
                             accessorTwin.getKey(),
                             accessorTwin.getValue().first(),
                             accessorTwin.getValue().second()
+                    )
+            );
+        }
+
+        for (Map.Entry<String, Field> fieldEntry : natives.entrySet()) {
+            fields.put(
+                    fieldEntry.getKey(),
+                    new NativeField<>(
+                            name,
+                            fieldEntry.getKey(),
+                            fieldEntry.getValue()
                     )
             );
         }
@@ -99,16 +124,21 @@ public class JGPAEntity<VO> {
         name = clazz.getAnnotation(Persistable.class).value();
         target = clazz;
         Class<?> current = clazz;
+        Map<String, Field> natives = new HashMap<>();
         Map<String, Twin<Method>> accessors = new HashMap<>();
         while (current != Object.class) {
+            List<Field> currentFields = new ArrayList<>(Arrays.asList(current.getDeclaredFields()));
             List<Method> currentMethods = new ArrayList<>(Arrays.asList(current.getDeclaredMethods()));
             for (Method m : currentMethods) {
                 resolve(m, accessors);
             }
+            for (Field f : currentFields) {
+                resolve(f, natives);
+            }
             current = current.getSuperclass();
         }
-        checkAccessorMap(accessors);
-        fieldInit(accessors);
+        checkMaps(accessors, natives);
+        fieldInit(accessors, natives);
     }
 
     public JGPAEntity(VO entity) {
@@ -138,9 +168,10 @@ public class JGPAEntity<VO> {
         bind(getEmpty());
     }
 
-    public void detach() {
+    public VO detach() {
         VO temp = entity;
         entity = null;
+        return temp;
     }
 
     public boolean bound() {

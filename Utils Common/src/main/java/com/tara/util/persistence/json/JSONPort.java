@@ -5,7 +5,6 @@ import com.tara.util.helper.lambda.ThrowingFunction;
 import com.tara.util.persistence.field.JGPAEntity;
 import com.tara.util.tools.Charsets;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -37,9 +36,9 @@ public class JSONPort {
 
     private static void writeKey(StringBuilder sb, String key) {
         sb.append(JSONSymbol.QUOT_MARK)
-          .append(key)
-          .append(JSONSymbol.QUOT_MARK)
-          .append(JSONSymbol.COLON);
+                .append(key)
+                .append(JSONSymbol.QUOT_MARK)
+                .append(JSONSymbol.COLON);
     }
 
     private static void writeObject(StringBuilder sb, Object value) {
@@ -203,7 +202,7 @@ public class JSONPort {
             } else if (value.matches(V_ARRAY)) {
                 Type expected = boundGateway.getField(key).getType();
                 if (!((Class<?>) expected).isArray()) {
-                    expected = boundGateway.getField(key).getter().getGenericReturnType();
+                    expected = boundGateway.getField(key).getGenericType();
                 }
                 assign = getJSONArray(expected, value);
             } else if (value.matches(V_OBJECT)) {
