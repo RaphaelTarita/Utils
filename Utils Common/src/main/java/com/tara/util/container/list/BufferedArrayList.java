@@ -50,49 +50,46 @@ public class BufferedArrayList<E> implements List<E> {
 
         public boolean contains(Object o) {
             BufferNode<E> cursor = first;
-            if (o == null) {
-                do {
-                    if (cursor.get() == null) {
-                        return true;
-                    }
-                    cursor = cursor.next();
-                } while (cursor.hasNext());
-            } else {
-                do {
-                    if (o.equals(cursor.get())) {
-                        return true;
-                    }
-                    cursor = cursor.next();
-                } while (cursor.hasNext());
-            }
+            do {
+                if (Objects.equals(cursor.get(), o)) {
+                    return true;
+                }
+                cursor = cursor.next();
+            } while (cursor.hasNext());
             return false;
         }
 
         public boolean remove(Object o) {
             BufferNode<E> cursor = new BufferNode<>(null);
             cursor.next = first;
-            if (o == null) {
-                do {
-                    if (cursor.next().get() == null) {
-                        if (cursor.next() == first) {
-                            first = cursor.next().next();
-                        }
-                        cursor.next = cursor.next().next();
-                        return true;
+            do {
+                if (Objects.equals(cursor.next().get(), o)) {
+                    if (cursor.next() == first) {
+                        first = cursor.next().next();
                     }
-                } while (cursor.next().hasNext());
-            } else {
-                do {
-                    if (o.equals(cursor.next().get())) {
-                        if (cursor.next() == first) {
-                            first = cursor.next().next();
-                        }
-                        cursor.next = cursor.next().next();
-                        return true;
-                    }
-                } while (cursor.next().hasNext());
-            }
+                    cursor.next = cursor.next().next();
+                    return true;
+                }
+                cursor = cursor.next();
+            } while (cursor.next().hasNext());
             return false;
+        }
+
+        public boolean removeAll(Collection<?> c) {
+            BufferNode<E> cursor = new BufferNode<>(null);
+            boolean found = false;
+
+            for (cursor.next = first; cursor.hasNext() && cursor.next().hasNext(); cursor = cursor.next()) {
+                if (c.contains(cursor.next().get())) {
+                    found = true;
+                    if (cursor.next() == first) {
+                        first = cursor.next().next();
+                    }
+                    cursor.next = cursor.next().next();
+                    size--;
+                }
+            }
+            return found;
         }
 
         public void buffer(E val) {
@@ -104,6 +101,17 @@ public class BufferedArrayList<E> implements List<E> {
                 last = last.next();
             }
             size++;
+        }
+
+        public void bufferFront(E val) {
+            if (size <= 0) {
+                buffer(val);
+            } else {
+                Buffer.BufferNode<E> buf = new Buffer.BufferNode<>(val);
+                buf.next = first;
+                first = buf;
+                size++;
+            }
         }
 
         public E pop() {
@@ -161,7 +169,7 @@ public class BufferedArrayList<E> implements List<E> {
             if (arrayLastRet == -1 && bufferLastRet == null) {
                 throw new IllegalStateException();
             }
-            if (arrayLastRet < endIndex()) {
+            if (arrayLastRet < endIndex() && arrayLastRet != -1) {
                 BufferedArrayList.this.remove(arrayLastRet);
                 arrayCursor = arrayLastRet;
                 arrayLastRet = -1;
@@ -175,6 +183,7 @@ public class BufferedArrayList<E> implements List<E> {
     }
 
     private static final int START_SIZE = 0;
+
     private Object[] elementData;
     private int validIndexStart;
     private int validIndexEnd;
@@ -199,7 +208,7 @@ public class BufferedArrayList<E> implements List<E> {
                 : elementData.length;
     }
 
-    private int flush() {
+    public int flush() {
         int prevEnd = endIndex();
         elementData = Arrays.copyOf(elementData, size());
         int index = prevEnd;
@@ -238,7 +247,7 @@ public class BufferedArrayList<E> implements List<E> {
     @Override
     @NotNull
     public Object[] toArray() {
-        flush();
+        //flush();
         return elementData;
     }
 
@@ -323,21 +332,87 @@ public class BufferedArrayList<E> implements List<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        return false;
+        for (E elem : c) {
+            buffer.buffer(elem);
+        }
+        return true;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean addAll(int index, Collection<? extends E> c) {
-        return false;
+        int size = c.size();
+
+        for (int i = endIndex() - 1; i >= index; i--) {
+            if (i + size >= elementData.length) {
+                buffer.bufferFront((E) elementData[i]);
+            } else {
+                elementData[i + size] = elementData[i];
+            }
+        }
+
+        int i = index;
+        for (E elem : c) {
+            elementData[i++] = elem;
+        }
+        return true;
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
-        return false;
+    public boolean removeAll(@NotNull Collection<?> c) {
+        boolean[] delmask = new boolean[elementData.length];
+        int middle = (endIndex() - startIndex()) / 2;
+        boolean found = false;
+
+        for (int i = startIndex(); i < endIndex(); i++) {
+            if (c.contains(elementData[i])) {
+                found = true;
+                delmask[i] = true;
+            } else {
+                delmask[i] = false;
+            }
+        }
+
+        int offset = 0;
+        for (int l = middle - 1; l >= startIndex() + offset; l--) {
+            if (delmask[l]) {
+                offset++;
+            } else if (offset > 0) {
+                elementData[l] = elementData[l - offset];
+            }
+        }
+        if (offset > 0) {
+            for (int i = startIndex(); i < startIndex() + offset; i++) {
+                elementData[i] = null;
+            }
+            validIndexStart = validIndexStart + offset;
+        }
+
+
+        offset = 0;
+        for (int r = middle; r < endIndex(); r++) {
+            if (delmask[r]) {
+                offset++;
+            } else if (offset > 0) {
+                if (r + offset < endIndex()) {
+                    elementData[r] = elementData[r + offset];
+                } else {
+                    elementData[r] = buffer.pop();
+                }
+            }
+        }
+        for (int i = endIndex() - offset; i < endIndex(); i++) {
+            E val = buffer.pop();
+            if (!c.contains(val)) {
+                elementData[i] = val;
+            }
+        }
+
+        return buffer.removeAll(c) || found;
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         return false;
     }
 
