@@ -7,11 +7,11 @@ import java.util.Objects;
 
 public class StringUID implements UID, Mirrorable<StringUID> {
     private static final long serialVersionUID = 9114740774376532987L;
-    private static final int MAX_RANDOM_ID_LENGTH = 50;
+    private static final int DEFAULT_LENGTH = 10;
 
     private static final CharRandom random = new CharRandom();
 
-    private String string;
+    private final String string;
 
     static {
         UID.registerBuilder(StringUID.class, StringUID::new);
@@ -22,12 +22,17 @@ public class StringUID implements UID, Mirrorable<StringUID> {
         registerUID();
     }
 
-    public StringUID() {
-        string = random.randomLengthString(MAX_RANDOM_ID_LENGTH);
+    public StringUID(int length) {
+        String candidate = random.randomString(length);
         while (!check()) {
-            string = random.randomLengthString(MAX_RANDOM_ID_LENGTH);
+            candidate = random.randomString(length);
         }
+        string = candidate;
         registerUID();
+    }
+
+    public StringUID() {
+        this(DEFAULT_LENGTH);
     }
 
     @Override
@@ -42,7 +47,7 @@ public class StringUID implements UID, Mirrorable<StringUID> {
         }
 
         return (obj instanceof StringUID)
-            && ((StringUID) obj).string.equals(string);
+                && ((StringUID) obj).string.equals(string);
     }
 
     @Override
