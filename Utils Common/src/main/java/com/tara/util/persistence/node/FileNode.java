@@ -71,6 +71,9 @@ public class FileNode<VO> extends AbstractNode<VO> {
 
             String json = JSONPort.toJSON(gateway);
             writer.write(json);
+            if (state.getState() == NodeStateEnum.LOCAL) {
+                state.update(NodeStateEnum.SYNC, "push successful");
+            }
         } catch (FileNotFoundException ex) {
             fileNotFound(ex);
         } catch (IOException ex) {
@@ -84,6 +87,7 @@ public class FileNode<VO> extends AbstractNode<VO> {
             gateway.bindEmpty();
             String json = readAll(reader);
             JSONPort.fromJSON(gateway, json);
+            state.update(NodeStateEnum.REMOTE, "fetch successful");
         } catch (FileNotFoundException ex) {
             fileNotFound(ex);
         } catch (IOException | FormatException ex) {

@@ -24,6 +24,11 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
     }
 
     @Override
+    public NodeState getState() {
+        return state;
+    }
+
+    @Override
     public UID id() {
         return nodeID;
     }

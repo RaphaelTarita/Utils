@@ -1,10 +1,6 @@
 package com.tara.util.helper.date;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -75,5 +71,9 @@ public final class DateHelper {
 
     public static Date reconvLT(LocalTime time) {
         return reconvLDT(time.atDate(LocalDate.now()));
+    }
+
+    public static long getEpochMillis(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }

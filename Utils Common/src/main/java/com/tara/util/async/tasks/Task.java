@@ -1,10 +1,6 @@
 package com.tara.util.async.tasks;
 
-import com.tara.util.async.tasks.criteria.ANDGroupCriterion;
-import com.tara.util.async.tasks.criteria.GroupCriterion;
-import com.tara.util.async.tasks.criteria.ManualInvokeCriterion;
-import com.tara.util.async.tasks.criteria.ManualRevokeCriterion;
-import com.tara.util.async.tasks.criteria.TaskCriterion;
+import com.tara.util.async.tasks.criteria.*;
 import com.tara.util.async.tasks.lock.LockingAction;
 import com.tara.util.async.tasks.lock.TaskLock;
 import com.tara.util.async.tasks.procedure.ProcedureException;
@@ -17,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class Task extends Thread implements Mirrorable<Task> {
+public class Task implements Mirrorable<Task> {
     private long iterations;
     private final TaskID id;
     private TaskLock lock;
@@ -56,7 +52,6 @@ public class Task extends Thread implements Mirrorable<Task> {
     }
 
     public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion criterion) {
-        super(taskName);
         id = new TaskID(taskName);
         lock = new TaskLock(id);
         retry = false;
@@ -67,17 +62,17 @@ public class Task extends Thread implements Mirrorable<Task> {
 
     public Task(String taskName, TaskProcedure taskProcedure, List<TaskCriterion> criteria) {
         this(
-                taskName,
-                taskProcedure,
-                new ANDGroupCriterion(criteria)
+            taskName,
+            taskProcedure,
+            new ANDGroupCriterion(criteria)
         );
     }
 
     public Task(String taskName, TaskProcedure taskProcedure, TaskCriterion... criteria) {
         this(
-                taskName,
-                taskProcedure,
-                new ANDGroupCriterion(criteria)
+            taskName,
+            taskProcedure,
+            new ANDGroupCriterion(criteria)
         );
     }
 
@@ -165,18 +160,23 @@ public class Task extends Thread implements Mirrorable<Task> {
     }
 
     public void forceExecute() {
-        resetAll();
-        try {
-            lock.lockOrRenewOnAction(LockingAction.EXECUTE);
-            taskProcedure.execute();
-            lock.liftRLock();
-            retry = false;
-            iterations++;
-        } catch (ProcedureException | RuntimeException ex) {
-            log.debug("Exception occurred in Task, locking...");
-            lock.liftRLock();
-            lock.lockOrRenewOnException(new TaskProcedureException(ex, id));
-        }
+        (new Thread(
+            () -> {
+                resetAll();
+                try {
+                    lock.lockOrRenewOnAction(LockingAction.EXECUTE);
+                    taskProcedure.execute();
+                    lock.liftRLock();
+                    retry = false;
+                    iterations++;
+                } catch (ProcedureException | RuntimeException ex) {
+                    log.debug("Exception occurred in Task, locking...");
+                    lock.liftRLock();
+                    lock.lockOrRenewOnException(new TaskProcedureException(ex, id));
+                }
+            },
+            toString()
+        )).start();
     }
 
     public long iterations() {
@@ -185,12 +185,6 @@ public class Task extends Thread implements Mirrorable<Task> {
 
     public TaskID id() {
         return id;
-    }
-
-    @Override
-    public void run() {
-        setName(toString());
-        execute();
     }
 
     @Override

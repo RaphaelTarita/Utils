@@ -7,14 +7,15 @@ import com.tara.util.mirror.Mirrors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class TaskScheduler extends Thread implements Mirrorable<TaskScheduler> {
-    private Map<TaskID, Task> tasks;
-    private SchedulerConfig config;
+    private final Map<TaskID, Task> tasks;
+    private final SchedulerConfig config;
     private Task recoveryTask;
     private Task retryTask;
     private long startTime;
@@ -50,27 +51,39 @@ public class TaskScheduler extends Thread implements Mirrorable<TaskScheduler> {
     public TaskScheduler(List<Task> tasks, SchedulerConfig config) {
         super(config.threadName());
         this.config = config;
-        this.tasks = new HashMap<>();
+        this.tasks = new ConcurrentHashMap<>();
         for (Task t : tasks) {
             this.tasks.put(t.id(), t);
         }
         startTime = 0;
 
         recoveryTask = new Task(
-                "RecoveryTask",
-                this::recoveryTaskImpl,
-                new TimeCriterion(
-                        config.recoverCycle()
-                )
+            "RecoveryTask",
+            this::recoveryTaskImpl,
+            new TimeCriterion(
+                config.recoverCycle()
+            )
         );
 
         retryTask = new Task(
-                "RetryTask",
-                this::retryTaskImpl,
-                new TimeCriterion(
-                        config.retryCycle()
-                )
+            "RetryTask",
+            this::retryTaskImpl,
+            new TimeCriterion(
+                config.retryCycle()
+            )
         );
+    }
+
+    public TaskScheduler(SchedulerConfig config) {
+        this(Collections.emptyList(), config);
+    }
+
+    public void addTask(Task task) {
+        tasks.put(task.id(), task);
+    }
+
+    public void removeTask(TaskID taskID) {
+        tasks.remove(taskID);
     }
 
     public Task getTask(TaskID taskID) {
@@ -96,11 +109,11 @@ public class TaskScheduler extends Thread implements Mirrorable<TaskScheduler> {
                 Thread.sleep(config.updateCycle());
                 for (Task task : tasks.values()) {
                     if (!task.scheduledForRetry()) {
-                        task.start();
+                        task.execute();
                     }
                 }
-                recoveryTask.start();
-                retryTask.start();
+                recoveryTask.execute();
+                retryTask.execute();
             }
         } catch (InterruptedException ex) {
             interrupt();
@@ -114,10 +127,10 @@ public class TaskScheduler extends Thread implements Mirrorable<TaskScheduler> {
     @Override
     public TaskScheduler mirror() {
         TaskScheduler tScheduler = new TaskScheduler(
-                new ArrayList<>(
-                        Mirrors.mirror(tasks).values()
-                ),
-                config.mirror()
+            new ArrayList<>(
+                Mirrors.mirror(tasks).values()
+            ),
+            config.mirror()
         );
         tScheduler.recoveryTask = recoveryTask.mirror();
         tScheduler.retryTask = retryTask.mirror();

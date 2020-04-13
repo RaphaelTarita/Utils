@@ -57,6 +57,14 @@ public class NodeState implements Mirrorable<NodeState> {
         return state;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
     private void printHistory0(StringBuilder builder) {
         builder.append(timestamp.format(formatter))
             .append(": [")
