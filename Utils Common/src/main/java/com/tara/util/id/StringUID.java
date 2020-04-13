@@ -8,11 +8,10 @@ import java.util.Objects;
 
 public class StringUID implements UID, Mirrorable<StringUID> {
     private static final long serialVersionUID = 9114740774376532987L;
-    private static final int MAX_RANDOM_ID_LENGTH = 50;
+    private static final int DEFAULT_LENGTH = 10;
+    private static final Charsets DEFAULT_CHARSET = Charsets.ALPHANUM;
 
-    private static final CharRandom random = new CharRandom(Charsets.ALPHANUM);
-
-    private String string;
+    private final String string;
 
     static {
         UID.registerBuilder(StringUID.class, StringUID::new);
@@ -23,12 +22,33 @@ public class StringUID implements UID, Mirrorable<StringUID> {
         registerUID();
     }
 
-    public StringUID() {
-        string = random.randomLengthString(MAX_RANDOM_ID_LENGTH);
+    public StringUID(CharRandom randomEngine, int length) {
+        String candidate = randomEngine.randomString(length);
         while (!check()) {
-            string = random.randomLengthString(MAX_RANDOM_ID_LENGTH);
+            candidate = randomEngine.randomString(length);
         }
+        string = candidate;
         registerUID();
+    }
+
+    public StringUID(Charsets charset, int length) {
+        this(new CharRandom(charset), length);
+    }
+
+    public StringUID(CharRandom randomEngine) {
+        this(randomEngine, DEFAULT_LENGTH);
+    }
+
+    public StringUID(Charsets charset) {
+        this(charset, DEFAULT_LENGTH);
+    }
+
+    public StringUID(int length) {
+        this(DEFAULT_CHARSET, length);
+    }
+
+    public StringUID() {
+        this(DEFAULT_CHARSET, DEFAULT_LENGTH);
     }
 
     @Override
