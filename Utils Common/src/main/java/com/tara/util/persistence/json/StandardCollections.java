@@ -2,16 +2,7 @@ package com.tara.util.persistence.json;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -25,10 +16,9 @@ public class StandardCollections {
         return instance;
     }
 
-    Map<Class<? extends Collection>, Supplier<? extends Collection<?>>> standards;
+    private final Map<Class<? extends Collection>, Supplier<? extends Collection<?>>> standards = new HashMap<>();
 
     private StandardCollections() {
-        standards = new HashMap<>();
 
         standards.put(Collection.class, ArrayList::new);
         standards.put(List.class, ArrayList::new);

@@ -1,93 +1,89 @@
 package com.tara.util.persistence.node.state;
 
-import com.tara.util.id.UID;
+import com.tara.util.helper.date.DateHelper;
+import com.tara.util.mirror.Mirrorable;
+import com.tara.util.mirror.Mirrors;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
 
-public class NodeState {
-    private static final int DEFAULT_MAXHISTORYCOUNT = 1024;
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+public class NodeState implements Mirrorable<NodeState> {
+    static {
+        Mirrors.registerSupplier(
+            LocalDateTime.class,
+            date -> DateHelper.convertLDT(DateHelper.copyDate(DateHelper.reconvLDT(date)))
+        );
+    }
 
-    private LinkedList<String> history = new LinkedList<>();
-    private final int maxHistoryCount;
-    private long discardedEntries = 0;
-
-    private final UID nodeID;
     private NodeStateEnum state;
     private String message;
     private LocalDateTime timestamp;
+    private NodeState prev;
+    private final DateTimeFormatter formatter;
 
-    private void record() {
-        if (maxHistoryCount != -1 && history.size() >= maxHistoryCount) {
-            history.removeFirst();
-            discardedEntries++;
-        }
-        history.add(toString());
+    private static LocalDateTime now() {
+        return LocalDateTime.now();
     }
 
-    public NodeState(UID nodeID, int maxHistoryCount) {
-        timestamp = LocalDateTime.now();
-        this.nodeID = nodeID;
-        state = NodeStateEnum.UNKNOWN;
-        message = "state init";
-        this.maxHistoryCount = maxHistoryCount;
+    public NodeState(DateTimeFormatter formatter) {
+        timestamp = now();
+        state = NodeStateEnum.EMPTY;
+        message = "<init>";
+        prev = null;
+        this.formatter = formatter;
     }
 
-    public NodeState(UID nodeID) {
-        this(nodeID, DEFAULT_MAXHISTORYCOUNT);
+    public NodeState() {
+        this(DateTimeFormatter.ofPattern("yyyy.MM.dd, HH:mm:ss.SSS"));
     }
 
     public void update(NodeStateEnum state, String message) {
-        record();
-        this.timestamp = LocalDateTime.now();
+        prev = mirror();
+
+        timestamp = now();
         this.state = state;
         this.message = message;
     }
 
     public void update(NodeStateEnum state) {
-        update(state, "(no message)");
+        update(state, "");
     }
 
     public void update(String message) {
         update(state, message);
     }
 
-    public NodeStateEnum getEnumeratedState() {
+    public NodeStateEnum getState() {
         return state;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[updated ")
-          .append(FMT.format(timestamp))
-          .append("] ")
-          .append(state.padded())
-          .append(": ")
-          .append(message);
-
-        return sb.toString();
+    private void printHistory0(StringBuilder builder) {
+        builder.append(timestamp.format(formatter))
+            .append(": [")
+            .append(state.toString())
+            .append("]\t")
+            .append(message.isEmpty() ? "<no message>" : message);
+        if (prev != null) {
+            builder.append('\n');
+            prev.printHistory0(builder);
+        }
     }
 
-    public String getHistory() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("history of node #id(")
-          .append(nodeID.mapUID())
-          .append("):\n\n");
+    public String printHistory() {
+        StringBuilder res = new StringBuilder();
+        printHistory0(res);
+        return res.toString();
+    }
 
-        long counter = discardedEntries;
-        for (String str : history) {
-            sb.append(counter++)
-              .append(".\t")
-              .append(str)
-              .append('\n');
-        }
-
-        sb.append("\nCurrent state: ")
-          .append(toString());
-
-        return sb.toString();
+    @Override
+    public NodeState mirror() {
+        NodeState res = new NodeState();
+        res.state = state;
+        res.message = message;
+        res.timestamp = Mirrors.mirror(timestamp);
+        res.prev = prev == null
+            ? null
+            : prev.mirror();
+        return res;
     }
 }

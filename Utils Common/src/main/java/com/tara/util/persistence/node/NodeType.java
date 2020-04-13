@@ -3,7 +3,7 @@ package com.tara.util.persistence.node;
 public enum NodeType {
     DB(DBNode.class),
     HTTP(HTTPNode.class),
-    JSON(JSONNode.class),
+    FILE(FileNode.class),
     OTHER(ResourceNode.class);
 
     private final Class<?> clazz;
@@ -21,8 +21,8 @@ public enum NodeType {
             return DB;
         } else if (HTTPNode.class.equals(clazz)) {
             return HTTP;
-        } else if (JSONNode.class.equals(clazz)) {
-            return JSON;
+        } else if (FileNode.class.equals(clazz)) {
+            return FILE;
         }
         return OTHER;
     }

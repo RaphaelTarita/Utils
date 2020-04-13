@@ -5,7 +5,7 @@ import com.tara.util.persistence.node.NodeType;
 public enum RepositoryType {
     DB(NodeType.DB),
     HTTP(NodeType.HTTP),
-    JSON(NodeType.JSON),
+    JSON(NodeType.FILE),
     OTHER(NodeType.OTHER),
     MIXED(NodeType.OTHER);
 
@@ -29,7 +29,7 @@ public enum RepositoryType {
                 return DB;
             case HTTP:
                 return HTTP;
-            case JSON:
+            case FILE:
                 return JSON;
             case OTHER:
                 return OTHER;

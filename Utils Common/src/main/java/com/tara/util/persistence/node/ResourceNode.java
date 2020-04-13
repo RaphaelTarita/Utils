@@ -4,11 +4,6 @@ import com.tara.util.id.UID;
 import com.tara.util.persistence.node.config.NodeConfig;
 
 public interface ResourceNode<VO> {
-    enum Priority {
-        REMOTE,
-        LOCAL
-    }
-
     default NodeType getType() {
         return NodeType.choose(this.getClass());
     }
@@ -17,15 +12,14 @@ public interface ResourceNode<VO> {
 
     void setConfig(NodeConfig config);
 
-    void setDefaultPriority(Priority priority);
-    void deleteDefaultPriority();
-    void resolve(Priority priority);
-    boolean conflicted();
+    void clear();
 
     void commit(VO vo);
+
     VO checkout();
 
     void push();
+
     void fetch();
 
     default void pushthrough(VO vo) {

@@ -1,13 +1,12 @@
 package com.tara.util.persistence.json;
 
-import com.tara.util.helper.date.DateHelper;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,25 +19,22 @@ public class StringCodecRegistry {
         return instance;
     }
 
-    private Map<Class<?>, StringMarshaller<?>> marshallerRegistry;
-    private Map<Class<?>, StringUnmarshaller<?>> unmarshallerRegistry;
-    private DateFormat dateFormat;
+    private final Map<Class<?>, StringMarshaller<?>> marshallerRegistry = new HashMap<>();
+    private final Map<Class<?>, StringUnmarshaller<?>> unmarshallerRegistry = new HashMap<>();
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+    private DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy.MM.dd, HH:mm:ss.SSS");
 
     private StringCodecRegistry() {
-        marshallerRegistry = new HashMap<>();
-        unmarshallerRegistry = new HashMap<>();
-        dateFormat = new SimpleDateFormat("yyyy.MM.dd");
-
         marshallerRegistry.put(String.class, StringMarshaller.identity());
         marshallerRegistry.put(Long.class, (Long l) -> Long.toString(l));
         marshallerRegistry.put(Integer.class, (Integer i) -> Integer.toString(i));
         marshallerRegistry.put(Short.class, (Short s) -> Short.toString(s));
         marshallerRegistry.put(Boolean.class, (Boolean b) -> Boolean.toString(b));
         marshallerRegistry.put(Date.class, (Date d) -> dateFormat.format(d));
-        marshallerRegistry.put(LocalDate.class, (LocalDate ld) -> dateFormat.format(DateHelper.reconvLD(ld)));
-        marshallerRegistry.put(LocalTime.class, (LocalTime lt) -> dateFormat.format(DateHelper.reconvLT(lt)));
-        marshallerRegistry.put(LocalDateTime.class, (LocalDateTime ldt) -> dateFormat.format(DateHelper.reconvLDT(ldt)));
-        marshallerRegistry.put(MarshallerFallback.class, MarshallerFallback.defaultMarshaller());
+        marshallerRegistry.put(LocalDate.class, (LocalDate ld) -> ld.format(dateTimeFormat));
+        marshallerRegistry.put(LocalTime.class, (LocalTime lt) -> lt.format(dateTimeFormat));
+        marshallerRegistry.put(LocalDateTime.class, (LocalDateTime ldt) -> ldt.format(dateTimeFormat));
+        marshallerRegistry.put(FALLBACK, MarshallerFallback.defaultMarshaller());
 
         unmarshallerRegistry.put(String.class, StringUnmarshaller.identity());
         unmarshallerRegistry.put(Long.class, Long::parseLong);
@@ -46,9 +42,9 @@ public class StringCodecRegistry {
         unmarshallerRegistry.put(Short.class, Short::parseShort);
         unmarshallerRegistry.put(Boolean.class, Boolean::parseBoolean);
         unmarshallerRegistry.put(Date.class, s -> dateFormat.parse(s));
-        unmarshallerRegistry.put(LocalDate.class, s -> DateHelper.convertLD(dateFormat.parse(s)));
-        unmarshallerRegistry.put(LocalTime.class, s -> DateHelper.convertLT(dateFormat.parse(s)));
-        unmarshallerRegistry.put(LocalDateTime.class, s -> DateHelper.convertLDT(dateFormat.parse(s)));
+        unmarshallerRegistry.put(LocalDate.class, s -> LocalDate.parse(s, dateTimeFormat));
+        unmarshallerRegistry.put(LocalTime.class, s -> LocalTime.parse(s, dateTimeFormat));
+        unmarshallerRegistry.put(LocalDateTime.class, s -> LocalDateTime.parse(s, dateTimeFormat));
     }
 
     public <P> void registerMarshaller(Class<? extends P> clazz, StringMarshaller<P> marshaller) {
@@ -61,6 +57,18 @@ public class StringCodecRegistry {
 
     public void setDateFormat(DateFormat format) {
         dateFormat = format;
+    }
+
+    public DateFormat getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateTimeFormat(DateTimeFormatter format) {
+        dateTimeFormat = format;
+    }
+
+    public DateTimeFormatter getDateTimeFormat() {
+        return dateTimeFormat;
     }
 
     @SuppressWarnings("unchecked")

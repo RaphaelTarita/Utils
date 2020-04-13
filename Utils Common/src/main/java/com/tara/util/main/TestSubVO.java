@@ -3,8 +3,10 @@ package com.tara.util.main;
 import com.tara.util.annotation.FieldGET;
 import com.tara.util.annotation.FieldSET;
 import com.tara.util.annotation.Persistable;
+import com.tara.util.annotation.Whitelist;
 
 @Persistable("TEST_SUB_VO")
+@Whitelist
 public class TestSubVO {
     private String test1;
     private String test2;
@@ -37,8 +39,8 @@ public class TestSubVO {
     @Override
     public String toString() {
         return "TestSubVO{" +
-                "test1='" + test1 + '\'' +
-                ", test2='" + test2 + '\'' +
-                '}';
+            "test1='" + test1 + '\'' +
+            ", test2='" + test2 + '\'' +
+            '}';
     }
 }

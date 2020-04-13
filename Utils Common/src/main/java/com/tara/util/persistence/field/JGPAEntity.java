@@ -1,15 +1,15 @@
 package com.tara.util.persistence.field;
 
-import com.tara.util.annotation.FieldGET;
-import com.tara.util.annotation.FieldSET;
-import com.tara.util.annotation.Persistable;
+import com.tara.util.annotation.*;
 import com.tara.util.container.tuple.Twin;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+@Slf4j
 public class JGPAEntity<VO> {
     private static final String MULTI_GET = "multiple get accessors on one field";
     private static final String MULTI_SET = "multiple set accessors on one field";
@@ -20,8 +20,8 @@ public class JGPAEntity<VO> {
     private static final String TYPE_MISMATCH = "get and set accessors do not match";
     private static final String ACCESSOR_NATIVE_INTERSECTION = "found intersection between accessor fields and native fields";
 
-    private String name;
-    private Class<?> target;
+    private final String name;
+    private final Class<?> target;
     private VO entity;
     private Map<String, JGPAField<VO>> fields;
 
@@ -52,8 +52,17 @@ public class JGPAEntity<VO> {
     }
 
     private void resolve(Field f, Map<String, Field> natives) {
-        if (f.isAnnotationPresent(com.tara.util.annotation.Field.class)) {
-            natives.put(f.getAnnotation(com.tara.util.annotation.Field.class).value(), f);
+        String annotationValue = f.isAnnotationPresent(com.tara.util.annotation.Field.class)
+            ? f.getAnnotation(com.tara.util.annotation.Field.class).value()
+            : "";
+        String fieldName = annotationValue.isEmpty()
+            ? f.getName()
+            : annotationValue;
+
+        if (target.isAnnotationPresent(Blacklist.class) && !f.isAnnotationPresent(Ignore.class)) {
+            natives.put(fieldName, f);
+        } else if (f.isAnnotationPresent(com.tara.util.annotation.Field.class)) {
+            natives.put(fieldName, f);
         }
     }
 
@@ -62,9 +71,9 @@ public class JGPAEntity<VO> {
         duplicates.retainAll(accessors.keySet());
         if (duplicates.size() > 0) {
             throw new FieldMappingException(duplicates.iterator().next(), name, ACCESSOR_NATIVE_INTERSECTION +
-                    (duplicates.size() > 1
-                            ? " (+ " + (duplicates.size() - 1) + " more related issues"
-                            : "")
+                (duplicates.size() > 1
+                    ? " (+ " + (duplicates.size() - 1) + " more related issues"
+                    : "")
             );
         }
 
@@ -95,24 +104,24 @@ public class JGPAEntity<VO> {
         fields = new HashMap<>(accessors.entrySet().size() + natives.entrySet().size());
         for (Map.Entry<String, Twin<Method>> accessorTwin : accessors.entrySet()) {
             fields.put(
+                accessorTwin.getKey(),
+                new AccessorField<>(
+                    name,
                     accessorTwin.getKey(),
-                    new AccessorField<>(
-                            name,
-                            accessorTwin.getKey(),
-                            accessorTwin.getValue().first(),
-                            accessorTwin.getValue().second()
-                    )
+                    accessorTwin.getValue().first(),
+                    accessorTwin.getValue().second()
+                )
             );
         }
 
         for (Map.Entry<String, Field> fieldEntry : natives.entrySet()) {
             fields.put(
+                fieldEntry.getKey(),
+                new NativeField<>(
+                    name,
                     fieldEntry.getKey(),
-                    new NativeField<>(
-                            name,
-                            fieldEntry.getKey(),
-                            fieldEntry.getValue()
-                    )
+                    fieldEntry.getValue()
+                )
             );
         }
     }
@@ -121,8 +130,15 @@ public class JGPAEntity<VO> {
         if (!clazz.isAnnotationPresent(Persistable.class)) {
             throw new FieldMappingException(clazz.getName(), "type is not annotated with @Persistable");
         }
-        name = clazz.getAnnotation(Persistable.class).value();
         target = clazz;
+        String val = clazz.getAnnotation(Persistable.class).value();
+        name = val.isEmpty()
+            ? target.getSimpleName()
+            : val;
+        if (!clazz.isAnnotationPresent(Whitelist.class) && !clazz.isAnnotationPresent(Blacklist.class)) {
+            log.warn("Explicitly mark your Entity '" + name + "' (class " + target.getName() + ") as whitelisted");
+        }
+
         Class<?> current = clazz;
         Map<String, Field> natives = new HashMap<>();
         Map<String, Twin<Method>> accessors = new HashMap<>();

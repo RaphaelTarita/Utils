@@ -1,24 +1,21 @@
 package com.tara.util.main;
 
-import com.tara.util.annotation.Field;
+import com.tara.util.annotation.Blacklist;
 import com.tara.util.annotation.Persistable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Persistable("TEST_VO")
+@Persistable
+@Blacklist
 public class TestVO {
-    @Field("TEST_1")
-    private String test1;
+    private final String test1;
 
-    @Field("TEST_2")
-    private List<Integer> test2;
+    private final List<Integer> test2;
 
-    @Field("TEST_3")
-    private Integer test3;
+    private final Integer test3;
 
-    @Field("SUB_VO")
-    private TestSubVO subVO;
+    private final TestSubVO subVO;
 
     public TestVO() {
         test1 = "";
@@ -37,10 +34,10 @@ public class TestVO {
     @Override
     public String toString() {
         return "TestVO{" +
-                "test1='" + test1 + '\'' +
-                ", test2=" + test2 +
-                ", test3=" + test3 +
-                ", subVO=" + subVO +
-                '}';
+            "test1='" + test1 + '\'' +
+            ", test2=" + test2 +
+            ", test3=" + test3 +
+            ", subVO=" + subVO +
+            '}';
     }
 }
