@@ -1,4 +1,4 @@
-package com.tara.util.persistence.field;
+package com.tara.util.persistence.entity;
 
 public class FieldMappingException extends RuntimeException {
     private final String fieldname;

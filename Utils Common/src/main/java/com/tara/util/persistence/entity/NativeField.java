@@ -1,4 +1,4 @@
-package com.tara.util.persistence.field;
+package com.tara.util.persistence.entity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -6,9 +6,9 @@ import java.lang.reflect.Type;
 
 public class NativeField<VO> extends JGPAField<VO> {
     private static final String PROBLEMATIC_FIELD = "malfunctioning native field in JGPA Field encountered: ";
-    private Field nativeField;
+    private final Field nativeField;
 
-    protected NativeField(String entity, String fieldname, Field field) {
+    public NativeField(String entity, String fieldname, Field field) {
         super(entity, fieldname);
         nativeField = field;
         if (Modifier.isPrivate(nativeField.getModifiers())) {

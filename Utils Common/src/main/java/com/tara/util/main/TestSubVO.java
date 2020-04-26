@@ -3,10 +3,8 @@ package com.tara.util.main;
 import com.tara.util.annotation.FieldGET;
 import com.tara.util.annotation.FieldSET;
 import com.tara.util.annotation.Persistable;
-import com.tara.util.annotation.Whitelist;
 
 @Persistable("TEST_SUB_VO")
-@Whitelist
 public class TestSubVO {
     private String test1;
     private String test2;

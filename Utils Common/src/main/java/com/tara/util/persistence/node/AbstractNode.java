@@ -2,7 +2,7 @@ package com.tara.util.persistence.node;
 
 import com.tara.util.id.StringUID;
 import com.tara.util.id.UID;
-import com.tara.util.persistence.field.JGPAEntity;
+import com.tara.util.persistence.entity.JGPAEntity;
 import com.tara.util.persistence.json.StringCodecRegistry;
 import com.tara.util.persistence.node.state.NodeState;
 import com.tara.util.persistence.node.state.NodeStateEnum;

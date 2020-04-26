@@ -2,7 +2,7 @@ package com.tara.util.persistence.node;
 
 import com.tara.util.id.UID;
 import com.tara.util.persistence.json.FormatException;
-import com.tara.util.persistence.json.JSONPort;
+import com.tara.util.persistence.json.JSONConvert;
 import com.tara.util.persistence.node.config.FileConfig;
 import com.tara.util.persistence.node.config.NodeConfig;
 import com.tara.util.persistence.node.state.NodeStateEnum;
@@ -69,7 +69,7 @@ public class FileNode<VO> extends AbstractNode<VO> {
                 }
             }
 
-            String json = JSONPort.toJSON(gateway);
+            String json = JSONConvert.toJSON(gateway);
             writer.write(json);
             if (state.getState() == NodeStateEnum.LOCAL) {
                 state.update(NodeStateEnum.SYNC, "push successful");
@@ -86,7 +86,7 @@ public class FileNode<VO> extends AbstractNode<VO> {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             gateway.bindEmpty();
             String json = readAll(reader);
-            JSONPort.fromJSON(gateway, json);
+            JSONConvert.fromJSON(gateway, json);
             state.update(NodeStateEnum.REMOTE, "fetch successful");
         } catch (FileNotFoundException ex) {
             fileNotFound(ex);

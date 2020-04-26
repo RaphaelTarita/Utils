@@ -2,7 +2,7 @@ package com.tara.util.persistence.json;
 
 import com.tara.util.annotation.Persistable;
 import com.tara.util.helper.lambda.ThrowingFunction;
-import com.tara.util.persistence.field.JGPAEntity;
+import com.tara.util.persistence.entity.JGPAEntity;
 import com.tara.util.tools.Charsets;
 
 import java.lang.reflect.ParameterizedType;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JSONPort {
+public final class JSONConvert {
     private static final String K = "\"([a-zA-Z_][a-zA-Z_0-9]*)\":";
     private static final String V_PRIMITIVE = "[^,\\{\\}]*";
     private static final String V_ARRAY = "\\[.*\\]";
@@ -23,7 +23,7 @@ public class JSONPort {
     private static final Pattern V = Pattern.compile("(" + V_OBJECT + "|" + V_ARRAY + "|" + V_PRIMITIVE + ")");
     private static final Pattern KV = Pattern.compile("\\{?" + K + V.pattern() + "[,\\}]");
 
-    private JSONPort() {
+    private JSONConvert() {
     }
 
     private static void jsonStart(StringBuilder sb) {
@@ -36,9 +36,9 @@ public class JSONPort {
 
     private static void writeKey(StringBuilder sb, String key) {
         sb.append(JSONSymbol.QUOT_MARK)
-                .append(key)
-                .append(JSONSymbol.QUOT_MARK)
-                .append(JSONSymbol.COLON);
+            .append(key)
+            .append(JSONSymbol.QUOT_MARK)
+            .append(JSONSymbol.COLON);
     }
 
     private static void writeObject(StringBuilder sb, Object value) {

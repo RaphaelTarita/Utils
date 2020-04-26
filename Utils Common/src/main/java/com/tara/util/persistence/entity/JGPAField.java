@@ -1,4 +1,4 @@
-package com.tara.util.persistence.field;
+package com.tara.util.persistence.entity;
 
 import com.tara.util.annotation.Persistable;
 import com.tara.util.persistence.json.StandardCollections;

@@ -1,16 +1,38 @@
-package com.tara.util.persistence.field;
+package com.tara.util.persistence.entity;
 
-import com.tara.util.annotation.*;
+import com.tara.util.annotation.Field;
+import com.tara.util.annotation.FieldGET;
+import com.tara.util.annotation.FieldSET;
+import com.tara.util.annotation.Ignore;
+import com.tara.util.annotation.Persistable;
+import com.tara.util.annotation.Scan;
+import com.tara.util.annotation.processor.GenericScanner;
 import com.tara.util.container.tuple.Twin;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class JGPAEntity<VO> {
+    private static final Class<? extends Persistable> PERSISTABLE = Persistable.class;
+    private static final Class<? extends Scan> SCAN = Scan.class;
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends Annotation>[] enable = new Class[]{
+        Field.class,
+        FieldGET.class,
+        FieldSET.class
+    };
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends Annotation>[] disable = new Class[]{Ignore.class};
+
     private static final String MULTI_GET = "multiple get accessors on one field";
     private static final String MULTI_SET = "multiple set accessors on one field";
     private static final String MISSING_GET = "get accessor is missing";
@@ -51,22 +73,16 @@ public class JGPAEntity<VO> {
         }
     }
 
-    private void resolve(Field f, Map<String, Field> natives) {
-        String annotationValue = f.isAnnotationPresent(com.tara.util.annotation.Field.class)
-            ? f.getAnnotation(com.tara.util.annotation.Field.class).value()
-            : "";
-        String fieldName = annotationValue.isEmpty()
-            ? f.getName()
-            : annotationValue;
+    private void resolve(java.lang.reflect.Field f, Map<String, java.lang.reflect.Field> natives) {
+        Field annotation = f.getAnnotation(Field.class);
+        String fieldName = annotation != null && !annotation.value().isEmpty()
+            ? annotation.value()
+            : f.getName();
 
-        if (target.isAnnotationPresent(Blacklist.class) && !f.isAnnotationPresent(Ignore.class)) {
-            natives.put(fieldName, f);
-        } else if (f.isAnnotationPresent(com.tara.util.annotation.Field.class)) {
-            natives.put(fieldName, f);
-        }
+        natives.put(fieldName, f);
     }
 
-    private void checkMaps(Map<String, Twin<Method>> accessors, Map<String, Field> natives) {
+    private void checkMaps(Map<String, Twin<Method>> accessors, Map<String, java.lang.reflect.Field> natives) {
         Set<String> duplicates = new HashSet<>(natives.keySet());
         duplicates.retainAll(accessors.keySet());
         if (duplicates.size() > 0) {
@@ -100,7 +116,7 @@ public class JGPAEntity<VO> {
         }
     }
 
-    private void fieldInit(Map<String, Twin<Method>> accessors, Map<String, Field> natives) {
+    private void fieldInit(Map<String, Twin<Method>> accessors, Map<String, java.lang.reflect.Field> natives) {
         fields = new HashMap<>(accessors.entrySet().size() + natives.entrySet().size());
         for (Map.Entry<String, Twin<Method>> accessorTwin : accessors.entrySet()) {
             fields.put(
@@ -114,7 +130,7 @@ public class JGPAEntity<VO> {
             );
         }
 
-        for (Map.Entry<String, Field> fieldEntry : natives.entrySet()) {
+        for (Map.Entry<String, java.lang.reflect.Field> fieldEntry : natives.entrySet()) {
             fields.put(
                 fieldEntry.getKey(),
                 new NativeField<>(
@@ -126,35 +142,70 @@ public class JGPAEntity<VO> {
         }
     }
 
-    public JGPAEntity(Class<?> clazz) {
-        if (!clazz.isAnnotationPresent(Persistable.class)) {
+    private void collect() {
+        Scan scan = target.getAnnotation(SCAN);
+        GenericScanner scanner = scan != null
+            ? GenericScanner.ignoreScanAnnotation(target, scan.value(), enable, scan.disable())
+            : GenericScanner.ignoreScanAnnotation(target, enable, disable);
+        scanner.scan();
+
+        Map<String, java.lang.reflect.Field> natives = new HashMap<>();
+        Map<String, Twin<Method>> accessors = new HashMap<>();
+        for (java.lang.reflect.Field f : scanner.getFields()) {
+            resolve(f, natives);
+        }
+        for (Method m : scanner.getMethods()) {
+            resolve(m, accessors);
+        }
+
+        checkMaps(accessors, natives);
+        fieldInit(accessors, natives);
+    }
+
+    private JGPAEntity(Class<?> clazz, String entityName) {
+        if (!entityName.isEmpty() && !clazz.isAnnotationPresent(PERSISTABLE)) {
             throw new FieldMappingException(clazz.getName(), "type is not annotated with @Persistable");
         }
         target = clazz;
-        String val = clazz.getAnnotation(Persistable.class).value();
+        String val = !entityName.isEmpty()
+            ? entityName
+            : target.getAnnotation(PERSISTABLE).value();
         name = val.isEmpty()
             ? target.getSimpleName()
             : val;
-        if (!clazz.isAnnotationPresent(Whitelist.class) && !clazz.isAnnotationPresent(Blacklist.class)) {
-            log.warn("Explicitly mark your Entity '" + name + "' (class " + target.getName() + ") as whitelisted");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <VO> JGPAEntity<VO> buildVirtual(Map<String, Object> structure, Class<VO> virtualType, String name) {
+        JGPAEntity<VO> res = new JGPAEntity<>(virtualType, name);
+        for (Map.Entry<String, Object> kv : structure.entrySet()) {
+            JGPAField<VO> fieldResult = null;
+            String key = kv.getKey();
+            Object value = kv.getValue();
+            if (value == null) {
+                throw new FieldMappingException(key, "virtual entity structure map contained null value: cannot infer type");
+            } else if (value instanceof JGPAField) {
+                fieldResult = (JGPAField<VO>) value;
+            } else if (value instanceof Map) {
+                value = buildVirtual((Map<String, Object>) value, key);
+            }
+
+            fieldResult = fieldResult == null
+                ? new VirtualField<>(name, key, value.getClass())
+                : fieldResult;
+            res.fields.put(key, fieldResult);
         }
 
-        Class<?> current = clazz;
-        Map<String, Field> natives = new HashMap<>();
-        Map<String, Twin<Method>> accessors = new HashMap<>();
-        while (current != Object.class) {
-            List<Field> currentFields = new ArrayList<>(Arrays.asList(current.getDeclaredFields()));
-            List<Method> currentMethods = new ArrayList<>(Arrays.asList(current.getDeclaredMethods()));
-            for (Method m : currentMethods) {
-                resolve(m, accessors);
-            }
-            for (Field f : currentFields) {
-                resolve(f, natives);
-            }
-            current = current.getSuperclass();
-        }
-        checkMaps(accessors, natives);
-        fieldInit(accessors, natives);
+        return res;
+    }
+
+    public static JGPAEntity<Object> buildVirtual(Map<String, Object> structure, String name) {
+        return buildVirtual(structure, Object.class, name);
+    }
+
+    public JGPAEntity(Class<?> clazz) {
+        this(clazz, "");
+        collect();
     }
 
     public JGPAEntity(VO entity) {
@@ -164,7 +215,6 @@ public class JGPAEntity<VO> {
 
     public void bind(VO entity) {
         if (target.isInstance(entity)) {
-            VO temp = this.entity;
             this.entity = entity;
         } else {
             throw new IllegalArgumentException("entity binding type mismatch, required: " + target.getName() + ", found: " + entity.getClass().getName());
@@ -198,13 +248,24 @@ public class JGPAEntity<VO> {
         return entity == null;
     }
 
+    public boolean isVirtual() {
+        for (JGPAField<VO> field : fields.values()) {
+            if (!(field instanceof VirtualField)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean hasField(String field) {
         return fields.containsKey(field);
     }
 
     public Object get(String field) {
-        requireBound();
         JGPAField<VO> entityField = getField(field);
+        if (!(entityField instanceof VirtualField)) {
+            requireBound();
+        }
         if (entityField != null) {
             return entityField.get(entity);
         } else {
@@ -213,8 +274,10 @@ public class JGPAEntity<VO> {
     }
 
     public void set(String field, Object value) {
-        requireBound();
         JGPAField<VO> entityField = getField(field);
+        if (!(entityField instanceof VirtualField)) {
+            requireBound();
+        }
         if (entityField != null) {
             entityField.set(entity, value);
         }
@@ -256,7 +319,9 @@ public class JGPAEntity<VO> {
     }
 
     public Map<String, Object> getValueMap() {
-        requireBound();
+        if (!isVirtual()) {
+            requireBound();
+        }
         Map<String, Object> values = new HashMap<>(fields.size());
         for (Map.Entry<String, JGPAField<VO>> entry : fields.entrySet()) {
             String k = entry.getKey();

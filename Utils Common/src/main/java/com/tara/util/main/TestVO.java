@@ -1,13 +1,11 @@
 package com.tara.util.main;
 
-import com.tara.util.annotation.Blacklist;
 import com.tara.util.annotation.Persistable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Persistable
-@Blacklist
 public class TestVO {
     private final String test1;
 
