@@ -130,9 +130,10 @@ public class LinkedMap<K, V> implements Map<K, V> {
         if (isEmpty()) {
             first = node;
             last = node;
+        } else {
+            last.overwriteNext(node);
+            last = node;
         }
-        last.overwriteNext(node);
-        last = node;
         size++;
     }
 
@@ -145,7 +146,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
             size = 0;
         } else {
             int s = 0;
-            for (Node<K, V> it = first; it.hasNext(); it = it.next()) {
+            for (Node<K, V> it = first; it != null; it = it.next()) {
                 s++;
             }
             size = s;
@@ -168,7 +169,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
     }
 
     public boolean contains(Object kv, Function<Node<K, V>, Object> getter) {
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             if (getter.apply(it).equals(kv)) {
                 return true;
             }
@@ -194,7 +195,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
         if (key == null) {
             return null;
         }
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             if (key.equals(it.getKey())) {
                 return it.getValue();
             }
@@ -209,7 +210,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
             return null;
         }
 
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             if (key.equals(it.getKey())) {
                 V oldval = it.getValue();
                 it.setValue(value);
@@ -227,7 +228,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
             return null;
         }
 
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             if (key.equals(it.getKey())) {
                 if (it == first) {
                     first = it.next();
@@ -260,7 +261,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
     public Set<K> keySet() {
         Set<K> set = new LinkedHashSet<>(size());
 
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             set.add(it.getKey());
         }
         return set;
@@ -271,7 +272,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
     public Collection<V> values() {
         List<V> list = new ArrayList<>(size());
 
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             list.add(it.getValue());
         }
         return list;
@@ -282,7 +283,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
     public Set<Entry<K, V>> entrySet() {
         Set<Entry<K, V>> set = new LinkedHashSet<>(size());
 
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             set.add(it);
         }
 
