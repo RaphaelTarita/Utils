@@ -130,9 +130,10 @@ public class LinkedMap<K, V> implements Map<K, V> {
         if (isEmpty()) {
             first = node;
             last = node;
+        } else {
+            last.overwriteNext(node);
+            last = node;
         }
-        last.overwriteNext(node);
-        last = node;
         size++;
     }
 
@@ -282,7 +283,7 @@ public class LinkedMap<K, V> implements Map<K, V> {
     public Set<Entry<K, V>> entrySet() {
         Set<Entry<K, V>> set = new LinkedHashSet<>(size());
 
-        for (Node<K, V> it = first; it != null && it.hasNext(); it = it.next()) {
+        for (Node<K, V> it = first; it != null; it = it.next()) {
             set.add(it);
         }
 

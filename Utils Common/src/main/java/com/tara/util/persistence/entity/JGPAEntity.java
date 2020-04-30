@@ -42,6 +42,8 @@ public class JGPAEntity<VO> {
     private static final String TYPE_MISMATCH = "get and set accessors do not match";
     private static final String ACCESSOR_NATIVE_INTERSECTION = "found intersection between accessor fields and native fields";
 
+    private static final Object VIRTUAL_ENTITY_DUMMY = new Object();
+
     private final String name;
     private final Class<?> target;
     private VO entity;
@@ -163,7 +165,7 @@ public class JGPAEntity<VO> {
     }
 
     private JGPAEntity(Class<?> clazz, String entityName) {
-        if (!entityName.isEmpty() && !clazz.isAnnotationPresent(PERSISTABLE)) {
+        if (entityName.isEmpty() && !clazz.isAnnotationPresent(PERSISTABLE)) {
             throw new FieldMappingException(clazz.getName(), "type is not annotated with @Persistable");
         }
         target = clazz;
@@ -178,6 +180,7 @@ public class JGPAEntity<VO> {
     @SuppressWarnings("unchecked")
     public static <VO> JGPAEntity<VO> buildVirtual(Map<String, Object> structure, Class<VO> virtualType, String name) {
         JGPAEntity<VO> res = new JGPAEntity<>(virtualType, name);
+        res.fields = new HashMap<>(structure.size());
         for (Map.Entry<String, Object> kv : structure.entrySet()) {
             JGPAField<VO> fieldResult = null;
             String key = kv.getKey();
@@ -190,9 +193,12 @@ public class JGPAEntity<VO> {
                 value = buildVirtual((Map<String, Object>) value, key);
             }
 
-            fieldResult = fieldResult == null
-                ? new VirtualField<>(name, key, value.getClass())
-                : fieldResult;
+            if (fieldResult == null) {
+                fieldResult = new VirtualField<>(name, key, value.getClass());
+                if (virtualType.equals(Object.class)) {
+                    fieldResult.set((VO) VIRTUAL_ENTITY_DUMMY, value);
+                }
+            }
             res.fields.put(key, fieldResult);
         }
 

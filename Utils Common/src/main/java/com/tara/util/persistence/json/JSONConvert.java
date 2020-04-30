@@ -106,6 +106,12 @@ public final class JSONConvert {
         return json.toString();
     }
 
+    public static String toJSON(List<JGPAEntity<?>> boundGateways) {
+        StringBuilder res = new StringBuilder();
+        writeArray(res, boundGateways.stream().map(JGPAEntity::getValueMap).toArray());
+        return res.toString();
+    }
+
     private static Object getPrimitive(Class<?> expected, String v) throws FormatException {
         if (v.contains("\"")) {
             v = v.replace("\"", "");

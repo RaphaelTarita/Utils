@@ -2,11 +2,15 @@ package com.tara.util.persistence.http;
 
 import com.tara.util.id.UID;
 import com.tara.util.persistence.entity.JGPAEntity;
+import com.tara.util.persistence.json.JSONConvert;
 import com.tara.util.persistence.node.config.HTTPConfig;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +26,7 @@ public final class HTTPConvert {
     }
 
     private static void appendUrlID(StringBuilder res, String id) {
-        if (res.charAt(res.length() - 1) != HTTPSymbol.SLASH.getch()) {
+        if (res.charAt(res.length() - 1) != HTTPSymbol.SLASH.getChar()) {
             res.append(HTTPSymbol.SLASH);
         }
         res.append(id);
@@ -64,6 +68,18 @@ public final class HTTPConvert {
         return res.toString();
     }
 
+    private static String getHeaders(Map<HTTPHeader, String> headers) {
+        StringBuilder res = new StringBuilder();
+        for (Map.Entry<HTTPHeader, String> header : headers.entrySet()) {
+            res.append(header.getKey())
+                .append(HTTPSymbol.COLON)
+                .append(HTTPSymbol.SPACE)
+                .append(header.getValue())
+                .append(HTTPSymbol.LINEBREAK);
+        }
+        return res.toString();
+    }
+
     public static String getRequest(UID id, HTTPConfig config, String idName) {
         List<JGPAEntity<?>> additionalBodys = resolveAdditionalBodys(config.additionalBodys());
         Map<String, String> additionalParams = config.additionalParams();
@@ -81,10 +97,34 @@ public final class HTTPConvert {
                 appendBodyID(additionalBodys, id.mapUID(), idName);
                 break;
         }
+        boolean hasBody = !additionalBodys.isEmpty();
+        String body = "";
+
         res.append(getParams(additionalParams))
             .append(HTTPSymbol.SPACE)
             .append(config.version())
             .append(HTTPSymbol.LINEBREAK);
+
+        Map<HTTPHeader, String> headers = new EnumMap<>(HTTPHeader.class);
+        if (config.version().order() < HTTPVersion.HTTP_2.order()) {
+            headers.put(HTTPHeader.CONNECTION, "keep-alive");
+            headers.put(HTTPHeader.KEEP_ALIVE, "timeout=" + config.keepAliveTimeout());
+        }
+        if (hasBody) {
+            body = JSONConvert.toJSON(additionalBodys);
+            headers.put(HTTPHeader.CONTENT_LENGTH, String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+            headers.put(HTTPHeader.CONTENT_TYPE, "application/json");
+        }
+        headers.put(HTTPHeader.HOST, config.host());
+        headers.put(HTTPHeader.DATE, stdFormat.format(Instant.now()) + " GMT");
+        headers.putAll(config.additionalHeaders());
+
+        res.append(getHeaders(headers));
+
+        if (hasBody) {
+            res.append(HTTPSymbol.LINEBREAK)
+                .append(body);
+        }
         return res.toString();
     }
 }

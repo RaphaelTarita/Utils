@@ -1,10 +1,13 @@
 package com.tara.util.persistence.node.config;
 
+import com.tara.util.container.map.LinkedMap;
 import com.tara.util.mirror.Mirrorable;
 import com.tara.util.mirror.Mirrors;
+import com.tara.util.persistence.http.HTTPHeader;
 import com.tara.util.persistence.http.HTTPVersion;
 import com.tara.util.persistence.http.IDpos;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,11 +20,11 @@ public class HTTPConfig implements NodeConfig {
     private final HTTPVersion version;
     private final IDpos pos;
     private final Map<String, String> additionalParams;
-    private final Map<String, String> additionalHeaders;
+    private final Map<HTTPHeader, String> additionalHeaders;
     private final Map<String, Map<String, Object>> additionalBodys;
 
 
-    public HTTPConfig(String ip, String url, int port, String host, int keepAliveTimeout, HTTPVersion version, IDpos pos, Map<String, String> additionalParams, Map<String, String> additionalHeaders, Map<String, Map<String, Object>> additionalBodys) {
+    public HTTPConfig(String ip, String url, int port, String host, int keepAliveTimeout, HTTPVersion version, IDpos pos, Map<String, String> additionalParams, Map<HTTPHeader, String> additionalHeaders, Map<String, Map<String, Object>> additionalBodys) {
         this.ip = ip;
         this.url = url;
         this.port = port;
@@ -43,7 +46,7 @@ public class HTTPConfig implements NodeConfig {
         private HTTPVersion version;
         private IDpos pos;
         private Map<String, String> additionalParams;
-        private Map<String, String> additionalHeaders;
+        private Map<HTTPHeader, String> additionalHeaders;
         private Map<String, Map<String, Object>> additionalBodys;
 
         private Builder() {
@@ -54,9 +57,9 @@ public class HTTPConfig implements NodeConfig {
             keepAliveTimeout = 10;
             version = HTTPVersion.HTTP_1_1;
             pos = IDpos.REQUEST_PARAM;
-            additionalParams = new HashMap<>(0);
-            additionalHeaders = new HashMap<>(0);
-            additionalBodys = new HashMap<>(0);
+            additionalParams = new LinkedMap<>();
+            additionalHeaders = new EnumMap<>(HTTPHeader.class);
+            additionalBodys = new LinkedMap<>();
         }
 
         private Builder(HTTPConfig config) {
@@ -67,8 +70,9 @@ public class HTTPConfig implements NodeConfig {
             keepAliveTimeout = config.keepAliveTimeout;
             version = config.version;
             pos = config.pos;
-            additionalParams = config.additionalParams;
-            additionalBodys = new HashMap<>(config.additionalBodys);
+            additionalParams = new LinkedMap<>(config.additionalParams);
+            additionalHeaders = new EnumMap<>(config.additionalHeaders);
+            additionalBodys = new LinkedMap<>(config.additionalBodys);
         }
 
         public Builder withIP(String ip) {
@@ -111,8 +115,18 @@ public class HTTPConfig implements NodeConfig {
             return this;
         }
 
-        public Builder withAdditionalHeaders(Map<String, String> additionalHeaders) {
+        public Builder withAdditionalParam(String name, String additionalParam) {
+            this.additionalParams.put(name, additionalParam);
+            return this;
+        }
+
+        public Builder withAdditionalHeaders(Map<HTTPHeader, String> additionalHeaders) {
             this.additionalHeaders = additionalHeaders;
+            return this;
+        }
+
+        public Builder withAdditionalHeader(HTTPHeader name, String additionalHeader) {
+            this.additionalHeaders.put(name, additionalHeader);
             return this;
         }
 
@@ -130,6 +144,7 @@ public class HTTPConfig implements NodeConfig {
             String resolvedHost = host == null
                 ? ip
                 : host;
+            Map<String, String> resolvedAdditionalParams = new HashMap<>(additionalParams);
             Map<String, Map<String, Object>> resolvedAdditionalBodys = new HashMap<>(additionalBodys);
             return new HTTPConfig(
                 ip,
@@ -139,7 +154,7 @@ public class HTTPConfig implements NodeConfig {
                 keepAliveTimeout,
                 version,
                 pos,
-                additionalParams,
+                resolvedAdditionalParams,
                 additionalHeaders,
                 resolvedAdditionalBodys
             );
@@ -177,7 +192,7 @@ public class HTTPConfig implements NodeConfig {
         return host;
     }
 
-    public int keepAliveTimeOut() {
+    public int keepAliveTimeout() {
         return keepAliveTimeout;
     }
 
@@ -193,7 +208,7 @@ public class HTTPConfig implements NodeConfig {
         return additionalParams;
     }
 
-    public Map<String, String> additionalHeaders() {
+    public Map<HTTPHeader, String> additionalHeaders() {
         return additionalHeaders;
     }
 

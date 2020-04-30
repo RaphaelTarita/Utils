@@ -19,7 +19,7 @@ public enum HTTPSymbol {
         return rep;
     }
 
-    public char getch() {
+    public char getChar() {
         return rep.charAt(0);
     }
 }
