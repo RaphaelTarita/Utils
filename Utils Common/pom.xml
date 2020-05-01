@@ -24,7 +24,13 @@
         <dependency>
             <groupId>com.tara.util</groupId>
             <artifactId>utils-annotations</artifactId>
-            <version>0.0.0-develop</version>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>16.0.3</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
