@@ -6,6 +6,7 @@ import com.tara.util.annotation.FieldSET;
 import com.tara.util.annotation.Ignore;
 import com.tara.util.annotation.Persistable;
 import com.tara.util.annotation.Scan;
+import com.tara.util.annotation.processor.DefaultPersistableValues;
 import com.tara.util.annotation.processor.GenericScanner;
 import com.tara.util.container.tuple.Twin;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class JGPAEntity<VO> {
 
     private final String name;
     private final Class<?> target;
+    private final String idName;
     private VO entity;
     private Map<String, JGPAField<VO>> fields;
 
@@ -165,7 +167,11 @@ public class JGPAEntity<VO> {
     }
 
     private JGPAEntity(Class<?> clazz, String entityName) {
-        if (entityName.isEmpty() && !clazz.isAnnotationPresent(PERSISTABLE)) {
+        if (clazz.isAnnotationPresent(PERSISTABLE)) {
+            idName = clazz.getAnnotation(PERSISTABLE).idName();
+        } else if (entityName.isEmpty()) {
+            idName = DefaultPersistableValues.ID_NAME;
+        } else {
             throw new FieldMappingException(clazz.getName(), "type is not annotated with @Persistable");
         }
         target = clazz;
@@ -265,6 +271,10 @@ public class JGPAEntity<VO> {
 
     public boolean hasField(String field) {
         return fields.containsKey(field);
+    }
+
+    public String idName() {
+        return idName;
     }
 
     public Object get(String field) {

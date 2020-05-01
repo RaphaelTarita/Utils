@@ -80,10 +80,10 @@ public final class HTTPConvert {
         return res.toString();
     }
 
-    public static String getRequest(UID id, HTTPConfig config, String idName) {
-        List<JGPAEntity<?>> additionalBodys = resolveAdditionalBodys(config.additionalBodys());
+    private static String formRequest(HTTPVerb verb, UID id, HTTPConfig config, String idName, List<JGPAEntity<?>> bodys) {
+        bodys.addAll(resolveAdditionalBodys(config.additionalBodys()));
         Map<String, String> additionalParams = config.additionalParams();
-        StringBuilder res = new StringBuilder(HTTPVerb.GET.toString());
+        StringBuilder res = new StringBuilder(verb.toString());
         res.append(HTTPSymbol.SPACE)
             .append(config.url());
         switch (config.idPos()) {
@@ -94,10 +94,10 @@ public final class HTTPConvert {
                 appendParamID(additionalParams, id.mapUID(), idName);
                 break;
             case REQUEST_BODY:
-                appendBodyID(additionalBodys, id.mapUID(), idName);
+                appendBodyID(bodys, id.mapUID(), idName);
                 break;
         }
-        boolean hasBody = !additionalBodys.isEmpty();
+        boolean hasBody = !bodys.isEmpty();
         String body = "";
 
         res.append(getParams(additionalParams))
@@ -111,7 +111,7 @@ public final class HTTPConvert {
             headers.put(HTTPHeader.KEEP_ALIVE, "timeout=" + config.keepAliveTimeout());
         }
         if (hasBody) {
-            body = JSONConvert.toJSON(additionalBodys);
+            body = JSONConvert.toJSON(bodys);
             headers.put(HTTPHeader.CONTENT_LENGTH, String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
             headers.put(HTTPHeader.CONTENT_TYPE, "application/json");
         }
@@ -126,5 +126,27 @@ public final class HTTPConvert {
                 .append(body);
         }
         return res.toString();
+    }
+
+    public static String getRequest(UID id, HTTPConfig config, String idName) {
+        return formRequest(
+            HTTPVerb.GET,
+            id,
+            config,
+            idName,
+            new ArrayList<>()
+        );
+    }
+
+    public static <VO> String putRequest(UID id, JGPAEntity<VO> boundGateway, HTTPConfig config) {
+        List<JGPAEntity<?>> bodys = new ArrayList<>();
+        bodys.add(boundGateway);
+        return formRequest(
+            HTTPVerb.PUT,
+            id,
+            config,
+            boundGateway.idName(),
+            bodys
+        );
     }
 }

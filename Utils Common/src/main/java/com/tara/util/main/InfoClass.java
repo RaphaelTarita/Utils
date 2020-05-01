@@ -2,6 +2,7 @@ package com.tara.util.main;
 
 import com.tara.util.id.StringUID;
 import com.tara.util.id.UID;
+import com.tara.util.persistence.entity.JGPAEntity;
 import com.tara.util.persistence.http.HTTPConvert;
 import com.tara.util.persistence.http.HTTPHeader;
 import com.tara.util.persistence.http.IDpos;
@@ -28,6 +29,8 @@ public class InfoClass {
             .withURL("path/to/resource")
             .withIDpos(IDpos.REQUEST_PARAM)
             .build();
-        log.info("\n\n" + HTTPConvert.getRequest(id, config, "id"));
+        TestVO vo = new TestVO();
+        JGPAEntity<TestVO> entity = new JGPAEntity<>(vo);
+        log.info("\n\n" + HTTPConvert.putRequest(id, entity, config));
     }
 }
