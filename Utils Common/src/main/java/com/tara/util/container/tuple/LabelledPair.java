@@ -32,8 +32,8 @@ public class LabelledPair<F, S> extends Pair<F, S> {
         @Override
         public boolean equals(Object obj) {
             return (obj instanceof Labelled)
-                    && ((Labelled) obj).value().equals(value)
-                    && ((Labelled) obj).label().equals(label);
+                && ((Labelled<?>) obj).value().equals(value)
+                && ((Labelled<?>) obj).label().equals(label);
         }
 
         @Override
@@ -48,8 +48,8 @@ public class LabelledPair<F, S> extends Pair<F, S> {
 
         private String valOrNull() {
             return value != null
-                    ? value.toString()
-                    : "<null>";
+                ? value.toString()
+                : "<null>";
         }
     }
 
@@ -94,8 +94,8 @@ public class LabelledPair<F, S> extends Pair<F, S> {
 
     public Pair<Labelled<F>, Labelled<S>> asPair() {
         return new Pair<>(
-                firstLabelled(),
-                secondLabelled()
+            firstLabelled(),
+            secondLabelled()
         );
     }
 
@@ -107,10 +107,10 @@ public class LabelledPair<F, S> extends Pair<F, S> {
     public LabelledPair<F, S> mirror() {
         Pair<F, S> superPair = super.mirror();
         return new LabelledPair<>(
-                superPair.first,
-                labelFirst,
-                superPair.second,
-                labelSecond
+            superPair.first,
+            labelFirst,
+            superPair.second,
+            labelSecond
         );
     }
 
@@ -121,7 +121,7 @@ public class LabelledPair<F, S> extends Pair<F, S> {
         }
 
         if (obj instanceof LabelledPair) {
-            return ((LabelledPair) obj).asPair().equals(this.asPair());
+            return ((LabelledPair<?, ?>) obj).asPair().equals(this.asPair());
         } else {
             return false;
         }

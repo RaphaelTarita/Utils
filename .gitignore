@@ -1,3 +1,5 @@
-/Utils.iml
 .idea/
 /target/
+*.iml
+*.ipr
+*.iws

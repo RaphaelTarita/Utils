@@ -2,10 +2,9 @@ package com.tara.util.id;
 
 import com.tara.util.mirror.Mirrorable;
 
-import java.io.Serializable;
 import java.util.Objects;
 
-public class HiLoIndex implements Serializable, Mirrorable<HiLoIndex> {
+public class HiLoIndex implements UID, Mirrorable<HiLoIndex> {
     private static final long serialVersionUID = 62459995810455813L;
 
     private enum HiLo {
@@ -19,9 +18,9 @@ public class HiLoIndex implements Serializable, Mirrorable<HiLoIndex> {
 
     private static void stateSwitch() {
         state = (
-                state == HiLo.LO
-                        ? HiLo.HI
-                        : HiLo.LO
+            state == HiLo.LO
+                ? HiLo.HI
+                : HiLo.LO
         );
     }
 
@@ -45,12 +44,22 @@ public class HiLoIndex implements Serializable, Mirrorable<HiLoIndex> {
 
     private final long index;
 
+    static {
+        UID.registerBuilder(HiLoIndex.class, HiLoIndex::mapString);
+    }
+
+    public static HiLoIndex mapString(String strIndex) {
+        return new HiLoIndex(Long.parseLong(strIndex));
+    }
+
     public HiLoIndex() {
         index = getNew();
+        registerUID();
     }
 
     public HiLoIndex(long index) {
         this.index = index;
+        registerUID();
     }
 
     public long toLong() {
@@ -58,9 +67,14 @@ public class HiLoIndex implements Serializable, Mirrorable<HiLoIndex> {
     }
 
     @Override
+    public String mapUID() {
+        return String.valueOf(index);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return (obj instanceof HiLoIndex)
-                && (this.index == ((HiLoIndex) obj).index);
+            && (this.index == ((HiLoIndex) obj).index);
     }
 
     @Override
