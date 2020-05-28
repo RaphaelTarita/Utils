@@ -1,6 +1,5 @@
 package com.tara.util.main;
 
-import com.tara.util.async.tasks.SchedulerConfig;
 import com.tara.util.container.list.BufferedArrayList;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,11 +40,5 @@ public class InfoClass {
         list1.removeAll(list2);
         list1.flush();
         list1.flush();
-
-        SchedulerConfig config = SchedulerConfig.builder()
-                .withThreadName("Thread-1")
-                .withRecoverCycle(3000)
-                .withRetryCycle(1000)
-                .build();
     }
 }
