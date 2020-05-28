@@ -9,4 +9,9 @@ public class DBConfig implements NodeConfig {
     public NodeConfig mirror() {
         return new DBConfig();
     }
+
+    @Override
+    public ConfigBuilder<? extends NodeConfig> thisBuilder() {
+        return null;
+    }
 }

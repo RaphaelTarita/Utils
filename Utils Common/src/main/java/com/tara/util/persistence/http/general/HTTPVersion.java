@@ -1,4 +1,4 @@
-package com.tara.util.persistence.http;
+package com.tara.util.persistence.http.general;
 
 public enum HTTPVersion {
     HTTP_0_9("HTTP/0.9", 900),
@@ -13,6 +13,16 @@ public enum HTTPVersion {
     HTTPVersion(String value, int order) {
         this.value = value;
         this.order = order;
+    }
+
+    public static HTTPVersion of(String value) {
+        for (HTTPVersion version : values()) {
+            if (version.value.equals(value)) {
+                return version;
+            }
+        }
+
+        throw new IllegalArgumentException("Invalid HTTP version: " + value);
     }
 
     public int order() {

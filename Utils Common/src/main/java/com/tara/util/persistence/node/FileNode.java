@@ -4,62 +4,43 @@ import com.tara.util.id.UID;
 import com.tara.util.persistence.json.FormatException;
 import com.tara.util.persistence.json.JSONConvert;
 import com.tara.util.persistence.node.config.FileConfig;
-import com.tara.util.persistence.node.config.NodeConfig;
 import com.tara.util.persistence.node.state.NodeStateEnum;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
-public class FileNode<VO> extends AbstractNode<VO> {
-    private FileConfig config;
+public class FileNode<VO> extends AbstractNode<VO, FileConfig> {
     private File file;
 
     public FileNode(UID id, Class<VO> target, FileConfig config) {
-        super(id, target);
-        this.config = config;
-        resolveFile();
+        super(config, id, target);
     }
 
     public FileNode(Class<VO> target, FileConfig config) {
-        super(target);
-        this.config = config;
-        resolveFile();
+        super(config, target);
     }
 
     public FileNode(UID id, Class<VO> target) {
-        super(id, target);
-        this.config = FileConfig.defaultConf();
-        resolveFile();
+        super(FileConfig.defaultConf(), id, target);
     }
 
     public FileNode(Class<VO> target) {
-        super(target);
-        this.config = FileConfig.defaultConf();
-        resolveFile();
-    }
-
-    @Override
-    public void setConfig(NodeConfig config) {
-        if (config instanceof FileConfig) {
-            this.config = (FileConfig) config;
-            resolveFile();
-        } else {
-            throw new IllegalArgumentException(
-                "Config class mismatch. Required: '"
-                    + FileConfig.class.toString()
-                    + "', Given: '" + config.getClass().toString()
-                    + '\''
-            );
-        }
+        super(FileConfig.defaultConf(), target);
     }
 
     @Override
     public void push() {
         try {
             if (file.createNewFile()) {
-                state.update("created new file: " + file.getAbsolutePath());
+                state.update(NodeAction.PUSH, "created new file: " + file.getAbsolutePath());
             }
         } catch (IOException ex) {
-            exc(ex, "push");
+            exc(ex, NodeAction.PUSH);
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -72,12 +53,12 @@ public class FileNode<VO> extends AbstractNode<VO> {
             String json = JSONConvert.toJSON(gateway);
             writer.write(json);
             if (state.getState() == NodeStateEnum.LOCAL) {
-                state.update(NodeStateEnum.SYNC, "push successful");
+                state.update(NodeAction.PUSH, NodeStateEnum.SYNC, "push successful");
             }
         } catch (FileNotFoundException ex) {
             fileNotFound(ex);
         } catch (IOException ex) {
-            exc(ex, "push");
+            exc(ex, NodeAction.PUSH);
         }
     }
 
@@ -87,25 +68,22 @@ public class FileNode<VO> extends AbstractNode<VO> {
             gateway.bindEmpty();
             String json = readAll(reader);
             JSONConvert.fromJSON(gateway, json);
-            state.update(NodeStateEnum.REMOTE, "fetch successful");
+            state.update(NodeAction.FETCH, NodeStateEnum.REMOTE, "fetch successful");
         } catch (FileNotFoundException ex) {
             fileNotFound(ex);
         } catch (IOException | FormatException ex) {
-            exc(ex, "fetch");
+            exc(ex, NodeAction.FETCH);
         }
     }
 
-    private void resolveFile() {
+    @Override
+    protected void reloadConfig() {
         file = config.getFile(nodeID.mapUID());
     }
 
     private void fileNotFound(FileNotFoundException ex) {
         gateway.detach();
-        state.update(NodeStateEnum.EMPTY, "file not found, cleared node: " + ex.toString());
-    }
-
-    private void exc(Exception ex, String action) {
-        state.update(NodeStateEnum.ERROR, "error occurred during" + action + ": " + ex.toString());
+        state.update(NodeAction.OTHER, NodeStateEnum.EMPTY, "file not found, cleared node: " + ex.toString());
     }
 
     private String readAll(BufferedReader reader) throws IOException {

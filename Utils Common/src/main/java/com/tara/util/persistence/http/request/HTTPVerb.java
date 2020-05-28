@@ -1,4 +1,6 @@
-package com.tara.util.persistence.http;
+package com.tara.util.persistence.http.request;
+
+import com.tara.util.persistence.http.general.RequireType;
 
 public enum HTTPVerb {
     CONNECT("CONNECT", RequireType.NOT_GIVEN, RequireType.GIVEN, RequireType.NOT_GIVEN, RequireType.NOT_GIVEN, RequireType.NOT_GIVEN),

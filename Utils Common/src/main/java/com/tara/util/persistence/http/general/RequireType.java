@@ -1,4 +1,4 @@
-package com.tara.util.persistence.http;
+package com.tara.util.persistence.http.general;
 
 public enum RequireType {
     GIVEN,

@@ -1,0 +1,2 @@
+GET /jgpa/test HTTP/1.1
+Host: www.tdsoft.at:8080

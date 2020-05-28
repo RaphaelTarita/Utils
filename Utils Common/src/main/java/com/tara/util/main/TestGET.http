@@ -1,6 +1,0 @@
-GET path/to/resource?password=12345&username=user&id=test HTTP/1.1
-Connection: keep-alive
-Date: Thu, 30 Apr 2020 23:03:10 GMT
-Host: 127.0.0.1
-Keep-Alive: timeout=10
-Expires: tomorrow

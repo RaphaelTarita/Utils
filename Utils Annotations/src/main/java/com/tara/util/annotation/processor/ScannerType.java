@@ -1,4 +1,4 @@
-package com.tara.util.annotation;
+package com.tara.util.annotation.processor;
 
 public enum ScannerType {
     WHITELIST,

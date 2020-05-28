@@ -2,7 +2,16 @@ package com.tara.util.persistence.json;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -16,6 +25,7 @@ public class StandardCollections {
         return instance;
     }
 
+    @SuppressWarnings("rawtypes")
     private final Map<Class<? extends Collection>, Supplier<? extends Collection<?>>> standards = new HashMap<>();
 
     private StandardCollections() {
@@ -29,7 +39,7 @@ public class StandardCollections {
         standards.put(BlockingDeque.class, LinkedBlockingDeque::new);
     }
 
-    public Supplier<? extends Collection<?>> getStandardImplementorSupplier(Class<? extends Collection> collectionClass) {
+    public Supplier<? extends Collection<?>> getStandardImplementorSupplier(@SuppressWarnings("rawtypes") Class<? extends Collection> collectionClass) {
         Supplier<? extends Collection<?>> supplier;
         if (Modifier.isAbstract(collectionClass.getModifiers()) || collectionClass.isInterface()) {
             supplier = standards.get(collectionClass);
@@ -49,7 +59,7 @@ public class StandardCollections {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Object> getStandardImplementor(Class<? extends Collection> collectionClass) {
+    public Collection<Object> getStandardImplementor(@SuppressWarnings("rawtypes") Class<? extends Collection> collectionClass) {
         return (Collection<Object>) getStandardImplementorSupplier(collectionClass).get();
     }
 }

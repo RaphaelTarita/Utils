@@ -1,11 +1,10 @@
 package com.tara.util.persistence.node.config;
 
 import com.tara.util.container.map.LinkedMap;
-import com.tara.util.mirror.Mirrorable;
 import com.tara.util.mirror.Mirrors;
-import com.tara.util.persistence.http.HTTPHeader;
-import com.tara.util.persistence.http.HTTPVersion;
-import com.tara.util.persistence.http.IDpos;
+import com.tara.util.persistence.http.general.HTTPHeader;
+import com.tara.util.persistence.http.general.HTTPVersion;
+import com.tara.util.persistence.http.general.IDpos;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -37,7 +36,7 @@ public class HTTPConfig implements NodeConfig {
         this.additionalBodys = additionalBodys;
     }
 
-    public static class Builder implements Mirrorable<Builder> {
+    public static class Builder implements ConfigBuilder<HTTPConfig> {
         private String ip;
         private String url;
         private int port;
@@ -140,9 +139,10 @@ public class HTTPConfig implements NodeConfig {
             return this;
         }
 
+        @Override
         public HTTPConfig build() {
             String resolvedHost = host == null
-                ? ip
+                ? ip + ':' + port
                 : host;
             Map<String, String> resolvedAdditionalParams = new HashMap<>(additionalParams);
             Map<String, Map<String, Object>> resolvedAdditionalBodys = new HashMap<>(additionalBodys);
@@ -216,6 +216,7 @@ public class HTTPConfig implements NodeConfig {
         return additionalBodys;
     }
 
+    @Override
     public Builder thisBuilder() {
         return new Builder(this);
     }

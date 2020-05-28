@@ -1,4 +1,4 @@
-package com.tara.util.persistence.http;
+package com.tara.util.persistence.http.general;
 
 public enum HTTPHeader {
     // important
@@ -114,6 +114,16 @@ public enum HTTPHeader {
 
     HTTPHeader(String value) {
         this.value = value;
+    }
+
+    public static HTTPHeader of(String value) {
+        for (HTTPHeader header : values()) {
+            if (header.value.equalsIgnoreCase(value)) {
+                return header;
+            }
+        }
+
+        throw new IllegalArgumentException("Invalid HTTP Header: " + value);
     }
 
     @Override

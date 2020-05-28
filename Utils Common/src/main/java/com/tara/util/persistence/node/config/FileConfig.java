@@ -1,6 +1,5 @@
 package com.tara.util.persistence.node.config;
 
-import com.tara.util.mirror.Mirrorable;
 import com.tara.util.mirror.Mirrors;
 
 import java.io.File;
@@ -15,7 +14,7 @@ public class FileConfig implements NodeConfig {
         this.fileExt = fileExt;
     }
 
-    public static class Builder implements Mirrorable<Builder> {
+    public static class Builder implements ConfigBuilder<FileConfig> {
         private Path builderNodePath;
         private String builderFileExt;
 
@@ -49,6 +48,7 @@ public class FileConfig implements NodeConfig {
             return this;
         }
 
+        @Override
         public FileConfig build() {
             return new FileConfig(builderNodePath, builderFileExt);
         }
@@ -73,6 +73,7 @@ public class FileConfig implements NodeConfig {
         return nodePath.resolve(filename + fileExt).toAbsolutePath().toFile();
     }
 
+    @Override
     public Builder thisBuilder() {
         return new Builder(this);
     }

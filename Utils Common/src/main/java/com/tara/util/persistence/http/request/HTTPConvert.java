@@ -1,7 +1,10 @@
-package com.tara.util.persistence.http;
+package com.tara.util.persistence.http.request;
 
 import com.tara.util.id.UID;
 import com.tara.util.persistence.entity.JGPAEntity;
+import com.tara.util.persistence.http.general.HTTPHeader;
+import com.tara.util.persistence.http.general.HTTPSymbol;
+import com.tara.util.persistence.http.general.HTTPVersion;
 import com.tara.util.persistence.json.JSONConvert;
 import com.tara.util.persistence.node.config.HTTPConfig;
 
@@ -128,13 +131,22 @@ public final class HTTPConvert {
         return res.toString();
     }
 
+    private static String formRequest(HTTPVerb verb, UID id, HTTPConfig config, String idName) {
+        return formRequest(
+            verb,
+            id,
+            config,
+            idName,
+            new ArrayList<>()
+        );
+    }
+
     public static String getRequest(UID id, HTTPConfig config, String idName) {
         return formRequest(
             HTTPVerb.GET,
             id,
             config,
-            idName,
-            new ArrayList<>()
+            idName
         );
     }
 
@@ -147,6 +159,15 @@ public final class HTTPConvert {
             config,
             boundGateway.idName(),
             bodys
+        );
+    }
+
+    public static String deleteRequest(UID id, HTTPConfig config, String idName) {
+        return formRequest(
+            HTTPVerb.DELETE,
+            id,
+            config,
+            idName
         );
     }
 }

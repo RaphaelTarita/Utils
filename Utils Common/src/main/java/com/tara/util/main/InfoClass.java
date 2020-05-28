@@ -1,36 +1,46 @@
 package com.tara.util.main;
 
 import com.tara.util.id.StringUID;
-import com.tara.util.id.UID;
-import com.tara.util.persistence.entity.JGPAEntity;
-import com.tara.util.persistence.http.HTTPConvert;
-import com.tara.util.persistence.http.HTTPHeader;
-import com.tara.util.persistence.http.IDpos;
+import com.tara.util.persistence.http.general.IDpos;
+import com.tara.util.persistence.node.HTTPNode;
 import com.tara.util.persistence.node.config.HTTPConfig;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
 
 @Slf4j
 public class InfoClass {
     private InfoClass() {
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         log.info(
             "This is the main class for java utils."
                 + "\nThe function main() displays this information."
                 + "\nThere is no other purpose of this Class."
         );
 
-        UID id = UID.mapString(StringUID.class, "test");
-        HTTPConfig config = HTTPConfig.builder()
-            .withAdditionalHeader(HTTPHeader.EXPIRES, "tomorrow")
-            .withAdditionalParam("username", "user")
-            .withAdditionalParam("password", "12345")
-            .withURL("path/to/resource")
-            .withIDpos(IDpos.REQUEST_PARAM)
-            .build();
         TestVO vo = new TestVO();
-        JGPAEntity<TestVO> entity = new JGPAEntity<>(vo);
-        log.info("\n\n" + HTTPConvert.putRequest(id, entity, config));
+
+        HTTPConfig config = HTTPConfig.builder()
+            .withIP("www.tdsoft.at")
+            .withPort(8080)
+            .withURL("/jgpa")
+            .withIDpos(IDpos.REQUEST_URL)
+            .build();
+
+        HTTPNode<TestVO> node = new HTTPNode<>(new StringUID("test"), TestVO.class, config);
+
+        node.commit(vo);
+        node.push();
+        node.fetch();
+        try {
+            vo = node.checkout();
+        } catch (Exception ex) {
+            log.error(ex.toString());
+        }
+        node.close();
+        log.info("\n\n" + node.getState().printHistory());
+        log.info(vo.toString());
     }
 }

@@ -1,7 +1,6 @@
 package com.tara.util.annotation.processor;
 
 import com.tara.util.annotation.Scan;
-import com.tara.util.annotation.ScannerType;
 
 import java.lang.annotation.Annotation;
 

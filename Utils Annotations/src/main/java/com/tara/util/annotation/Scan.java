@@ -1,5 +1,7 @@
 package com.tara.util.annotation;
 
+import com.tara.util.annotation.processor.ScannerType;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -4,24 +4,51 @@ import com.tara.util.id.StringUID;
 import com.tara.util.id.UID;
 import com.tara.util.persistence.entity.JGPAEntity;
 import com.tara.util.persistence.json.StringCodecRegistry;
+import com.tara.util.persistence.node.config.NodeConfig;
 import com.tara.util.persistence.node.state.NodeState;
 import com.tara.util.persistence.node.state.NodeStateEnum;
 
-public abstract class AbstractNode<VO> implements ResourceNode<VO> {
+public abstract class AbstractNode<VO, C extends NodeConfig> implements ResourceNode<VO> {
     protected final UID nodeID;
     protected final JGPAEntity<VO> gateway;
     protected final NodeState state;
 
+    protected C config;
 
-    protected AbstractNode(UID id, Class<VO> target) {
+    private final Class<?> configType;
+
+
+    protected AbstractNode(C config, UID id, Class<VO> target) {
+        this.configType = config.getClass();
+        this.config = config;
         nodeID = id;
         gateway = new JGPAEntity<>(target);
         state = new NodeState(StringCodecRegistry.instance().getDateTimeFormat());
+        reloadConfig();
     }
 
-    protected AbstractNode(Class<VO> target) {
-        this(new StringUID(), target);
+    protected AbstractNode(C config, Class<VO> target) {
+        this(config, new StringUID(), target);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void setConfig(NodeConfig config) {
+        if (configType.isInstance(config)) {
+            this.config = (C) config;
+            reloadConfig();
+        } else {
+            throw new IllegalArgumentException(
+                "Config class mismatch. Required: '"
+                    + configType.toString()
+                    + "', Given: '"
+                    + config.getClass().toString()
+                    + '\''
+            );
+        }
+    }
+
+    protected abstract void reloadConfig();
 
     @Override
     public NodeState getState() {
@@ -36,13 +63,13 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
     @Override
     public void clear() {
         gateway.detach();
-        state.update(NodeStateEnum.EMPTY, "node content cleared");
+        state.update(NodeAction.OTHER.setAlt("delete"), NodeStateEnum.EMPTY, "node content cleared");
     }
 
     @Override
     public void commit(VO vo) {
         gateway.bind(vo);
-        state.update(NodeStateEnum.LOCAL, "committed local resource");
+        state.update(NodeAction.COMMIT, NodeStateEnum.LOCAL, "committed local resource");
     }
 
     @Override
@@ -55,9 +82,13 @@ public abstract class AbstractNode<VO> implements ResourceNode<VO> {
             );
         } else {
             if (state.getState() == NodeStateEnum.REMOTE) {
-                state.update(NodeStateEnum.SYNC, "checked out remote resource");
+                state.update(NodeAction.CHECKOUT, NodeStateEnum.SYNC, "checked out remote resource");
             }
             return gateway.getVO();
         }
+    }
+
+    protected void exc(Exception ex, NodeAction action) {
+        state.update(action, NodeStateEnum.ERROR, "error occurred: " + ex.toString());
     }
 }
