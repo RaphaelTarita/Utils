@@ -2,7 +2,12 @@ package com.tara.util.container.list;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
 
 public class BufferedArrayList<E> implements List<E> {
     private static class Buffer<E> {
@@ -187,7 +192,7 @@ public class BufferedArrayList<E> implements List<E> {
     private Object[] elementData;
     private int validIndexStart;
     private int validIndexEnd;
-    private Buffer<E> buffer;
+    private final Buffer<E> buffer;
 
     public BufferedArrayList() {
         elementData = new Object[START_SIZE];
@@ -198,14 +203,14 @@ public class BufferedArrayList<E> implements List<E> {
 
     private int startIndex() {
         return validIndexStart != -1
-                ? validIndexStart
-                : 0;
+            ? validIndexStart
+            : 0;
     }
 
     private int endIndex() {
         return validIndexEnd != -1
-                ? validIndexEnd
-                : elementData.length;
+            ? validIndexEnd
+            : elementData.length;
     }
 
     public int flush() {
@@ -332,10 +337,21 @@ public class BufferedArrayList<E> implements List<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
+        int i = endIndex();
         for (E elem : c) {
-            buffer.buffer(elem);
+            if (i >= elementData.length) {
+                break;
+            }
+            elementData[i++] = elem;
         }
-        return true;
+        int j = endIndex();
+        for (E elem : c) {
+            // skip to end of array
+            if (j++ >= elementData.length) {
+                buffer.buffer(elem);
+            }
+        }
+        return c.size() > 0;
     }
 
     @Override
